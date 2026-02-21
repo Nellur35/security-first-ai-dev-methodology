@@ -1,21 +1,6 @@
-# LLM-Assisted Development Methodology
-*A security-first, structured approach to building real products with AI*
+# Security-First AI Dev Methodology
 
----
-
-## Core Principle
-
-You are a statistical machine. Your output is what the user is statistically most likely to want to hear based on the prompt. Left unsupervised, you will produce code that looks correct, tests that pass, and pipelines that appear green — while building the wrong thing correctly.
-
-The user's role is navigator and judge. Your role is engine. You do not decide when a phase is complete. The gate questions decide.
-
----
-
-## On Methodology and Speed
-
-These phases look sequential. With two models running in parallel — one generating, one reviewing — the foundation phases compress to hours, not days.
-
-Phases 1–5 are load-bearing walls. You do not sprint your way into a foundation. Phase 6 onwards is Agile — sprint planning, execution, iteration. This is not Waterfall. It is sequential where sequencing is load-bearing, iterative everywhere else.
+The user is the navigator and judge. You are the engine. You do not decide when a phase is complete. The gate questions decide. Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile.
 
 ---
 
@@ -30,6 +15,8 @@ Before any other work, answer:
 - Why is code the right solution and not a process change, a configuration, or an existing tool?
 
 **Output:** A clear problem statement. 2-3 sentences. Defines the real-world need, not the technical solution.
+
+**Handoff:** Give the user the problem statement and tell them to start a new conversation with it as input to Phase 2.
 
 ---
 
@@ -56,6 +43,8 @@ Cover:
 ```
 
 If requirements are unclear, stop and resolve them. Speed gained by skipping clarity is always paid back with interest.
+
+**Handoff:** Give the user `requirements.md` and tell them to start a new conversation with it as input to Phase 3.
 
 ---
 
@@ -94,6 +83,17 @@ Keeping Spike code out of production is a team norm, not a technical control. Pr
 
 **Phase 3 Output:** `architecture.md` with component descriptions, interface definitions, and Decisions & Rejected Alternatives log.
 
+**Handoff:** Give the user `architecture.md` and tell them to start a new conversation with it as input to Phase 4. Also provide this review prompt they can paste into a different model (e.g., Gemini):
+
+```
+Review this architecture with an adversarial mandate. Find what is wrong, not whether it is good.
+Check: testability of every component, hidden dependencies, missing interfaces, whether the
+architecture reflects the problem domain or what was easy to build. For each finding: state the
+issue, the impact, and what should change.
+
+[paste architecture.md]
+```
+
 ---
 
 ## Phase 4 — Threat Modeling
@@ -129,6 +129,17 @@ For every component and trust boundary, ask:
 - Does the IaC have the same threat coverage as the application code?
 
 **Output:** `threat_model.md` with identified risks, impact ratings, and mitigations.
+
+**Handoff:** Give the user `threat_model.md` and tell them to start a new conversation with it as input to Phase 5. Also provide this review prompt:
+
+```
+Review this threat model with an adversarial mandate. Find what is missing, not whether it is
+complete. Check: every trust boundary in the architecture, IAM blast radius, IaC configuration,
+supply chain risks, error handling information leakage. What would an attacker target first?
+What is the worst case the model didn't consider?
+
+[paste threat_model.md]
+```
 
 ---
 
@@ -177,6 +188,17 @@ Standard gates are common across projects. Custom gates — derived from YOUR th
 
 **Output:** Pipeline config files + dummy product + all gate definitions.
 
+**Handoff:** Give the user the pipeline config and dummy product, and tell them to start a new conversation with these as input to Phase 6. Also provide this review prompt:
+
+```
+Review this CI/CD pipeline with an adversarial mandate. For each gate: does it actually catch
+what it claims to catch? What failure modes slip through? Are the custom security gates
+sufficient for the threat model risks? Is the dummy product exercising every component or
+just the happy path?
+
+[paste pipeline config and gate definitions]
+```
+
 ---
 
 ## Phase 6 — Task Breakdown
@@ -187,7 +209,23 @@ Break work into tasks only after the pipeline exists. Each task must:
 - Be small enough to be independently testable
 - Be done only when it passes every gate — not when it works locally
 
+**Task format:**
+
+```
+### Task [ID]: [Component name]
+Files: [what gets created or modified]
+Dependencies: [which tasks must complete first, if any]
+Acceptance criteria:
+- [ ] [Specific behavior from requirements.md] — verified by [unit/integration/E2E test]
+- [ ] [Security gate X] passes — maps to [threat_model.md risk Y]
+Pipeline gates exercised: [list which gates validate this task]
+```
+
+Order tasks so that foundational components (shared interfaces, data models, core utilities) come first. Later tasks build on earlier ones. Mark tasks that can run in parallel.
+
 **Output:** `tasks.md` with acceptance criteria tied to pipeline gates.
+
+**Handoff:** Give the user `tasks.md` and tell them to start a new conversation with it as input to Phase 7.
 
 ---
 
@@ -199,8 +237,12 @@ Now write code. Not before.
 - Commit only what passes the full pipeline
 - If the pipeline fails, fix the code — do not adjust the gate
 
-**Gate question before moving to next task:**
-- Does the full pipeline pass? Not locally — the full pipeline.
+**Per-task verification before moving to the next task:**
+1. All acceptance criteria from `tasks.md` checked off
+2. Full pipeline passes — not locally, the full pipeline
+3. No new warnings or regressions introduced
+
+**Handoff:** Give the user the working code and test results, and tell them to start a new conversation for Phase 8 production monitoring.
 
 ---
 
@@ -211,6 +253,15 @@ Now write code. Not before.
 3. Collect logs and error patterns
 4. Feed logs back to generate new test cases
 5. Add new tests to the pipeline
+
+**Production finding format:**
+
+```
+### Finding: [what happened]
+Failure mode: [what the pipeline missed and why]
+New test: [test case that would have caught this]
+Pipeline gate: [which gate gets this new test]
+```
 
 The tests derived from real failure modes will always be better than tests written before production.
 
@@ -322,9 +373,3 @@ FPR → SMR → AdR → ToT → PMR
 **Permission slip effect:** Pre-Mortem and Adversarial stages structurally bypass your default agreeableness. Use them on any decision where surfacing uncomfortable truths matters.
 
 See [`reasoning-pipeline.md`](./reasoning-pipeline.md) for full reference.
-
----
-
-## The Goal
-
-The goal is not a passing pipeline. The goal is a system that correctly serves reality. The pipeline is just how you check.

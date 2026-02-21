@@ -20,15 +20,7 @@ allowed-tools:
 
 # Security-First AI Dev Methodology
 
-You are following a structured, security-first development methodology. The user is the navigator and judge. You are the engine.
-
-## Core Principle
-
-You are a statistical machine. Left unsupervised, you will produce code that looks correct, tests that pass, and pipelines that appear green — while building the wrong thing correctly. This methodology exists to counteract that tendency.
-
-## The Phases
-
-Work proceeds through 8 phases. Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is iterative.
+The user is the navigator and judge. You are the engine. You do not decide when a phase is complete. The gate questions decide. Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is iterative.
 
 ### Phase 1 — Define the Problem
 Answer: What is the actual problem? Why does code solve it better than another approach?
@@ -37,7 +29,7 @@ Answer: What is the actual problem? Why does code solve it better than another a
 - What breaks in the real world if this is not built?
 - Why is code the right solution and not a process change, a configuration, or an existing tool?
 
-**Output:** Problem statement (2-3 sentences).
+**Output:** Problem statement (2-3 sentences). **Handoff:** new conversation with problem statement as input.
 
 ### Phase 2 — Product Requirements
 Define what the product must do, not how it will do it.
@@ -47,7 +39,7 @@ Define what the product must do, not how it will do it.
 - What is explicitly out of scope?
 - What does done look like in reality, not on a dashboard?
 
-**Output:** `requirements.md` with Decisions & Rejected Alternatives section.
+**Output:** `requirements.md` with Decisions & Rejected Alternatives section. **Handoff:** new conversation with `requirements.md` as input.
 
 ### Phase 3 — Architecture & Design
 Design for testability: clean boundaries, dependency injection, no global state.
@@ -57,7 +49,7 @@ Design for testability: clean boundaries, dependency injection, no global state.
 - Where are the external dependencies and how are they mocked?
 - Does the architecture reflect the problem domain or what was easy to build?
 
-**Output:** `architecture.md` with component diagram, interfaces, and Decisions & Rejected Alternatives.
+**Output:** `architecture.md` with component diagram, interfaces, and Decisions & Rejected Alternatives. **Handoff:** new conversation with `architecture.md` as input. Provide a review prompt the user can paste into a different model for adversarial review.
 
 ### Phase 4 — Threat Modeling
 For every component and trust boundary, ask: What does an adversary see? What can they manipulate? What is the worst outcome?
@@ -69,7 +61,7 @@ Examine: trust boundaries, data flows, authentication, authorization, external d
 - If the IAM execution role is compromised, what is the blast radius?
 - Does the IaC have the same threat coverage as the application code?
 
-**Output:** `threat_model.md` with risks, impact ratings, and mitigations.
+**Output:** `threat_model.md` with risks, impact ratings, and mitigations. **Handoff:** new conversation with `threat_model.md` as input. Provide a review prompt for adversarial review by a different model.
 
 ### Phase 5 — CI/CD Pipeline Design
 The pipeline is the formal definition of done. Design it before implementation.
@@ -85,16 +77,22 @@ Include: unit tests, integration tests, E2E tests, dummy product, coverage thres
 - Which gate catches which failure mode?
 - Does the dummy product exercise every component?
 
-**Output:** Pipeline config + dummy product + gate definitions.
+**Output:** Pipeline config + dummy product + gate definitions. **Handoff:** new conversation with pipeline config + dummy product as input. Provide a review prompt for adversarial review by a different model.
 
 ### Phase 6 — Task Breakdown
-Each task must produce a pipeline-validatable component with acceptance criteria.
+Each task must: produce a pipeline-validatable component, have acceptance criteria tied to pipeline gates, be independently testable, be done only when it passes every gate.
+
+Task format: `### Task [ID]: [Component] / Files: [paths] / Dependencies: [prior tasks] / Acceptance criteria: [behavior from requirements.md verified by specific test, security gate mapped to threat_model.md risk] / Pipeline gates exercised: [list]`
+
+**Output:** `tasks.md` with acceptance criteria tied to pipeline gates. **Handoff:** new conversation with `tasks.md` as input.
 
 ### Phase 7 — Implementation
-Write tests alongside code. Commit only what passes the full pipeline. If the pipeline fails, fix the code — do not adjust the gate.
+Write tests alongside code. Commit only what passes the full pipeline. If the pipeline fails, fix the code — do not adjust the gate. Before moving to next task: all acceptance criteria checked, full pipeline passes, no new regressions.
+
+**Handoff:** Give the user working code + test results for Phase 8 production monitoring.
 
 ### Phase 8 — Production Feedback Loop
-Deploy, monitor, collect failure patterns, generate new tests, feed them back into the pipeline.
+Deploy, monitor, collect failure patterns, generate new tests, feed them back into the pipeline. For each finding, capture: what happened, what the pipeline missed, the new test case, which gate gets it.
 
 ## Conversation Architecture
 

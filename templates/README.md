@@ -9,6 +9,8 @@ These templates show the expected shape and depth for each phase's output file. 
 | 3. Architecture | [`phase-3-architecture.md`](phase-3-architecture.md) | Component boundaries, mock strategies, dependency injection, testability. |
 | 4. Threat Model | [`phase-4-threat-model.md`](phase-4-threat-model.md) | Trust boundaries mapped. IAM blast radius analyzed. Error handling reviewed. Supply chain examined. |
 | 5. CI/CD | [`phase-5-cicd.md`](phase-5-cicd.md) | Every gate mapped to a threat or failure mode. Dummy product defined. Waivers documented. |
+| 6. Tasks | [`phase-6-tasks.md`](phase-6-tasks.md) | Every task maps to pipeline gates. Acceptance criteria tied to requirements and threat model. |
+| 8. Production | [`phase-8-production.md`](phase-8-production.md) | Each finding generates a new test. Pipeline evolution tracked. |
 
 ## How to use these
 
