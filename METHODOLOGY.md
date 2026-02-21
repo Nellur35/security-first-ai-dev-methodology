@@ -396,7 +396,7 @@ The waiver does not need to be formal. It can be a comment in a PR, a line in a 
 
 ## Teaching the Methodology
 
-The intuition behind this methodology developed through a month of trial, error, pushback, and verification against reality. You cannot transfer that experience through a document. What you can do is replace intuition with structure — so someone without the intuition arrives at the same decisions.
+The intuition behind this methodology developed through building real systems with LLMs — trial, error, pushback, and verification against reality. You cannot transfer that experience through a document. What you can do is replace intuition with structure — so someone without the intuition arrives at the same decisions.
 
 The key is to convert every phase from a description into a set of questions that must be answered before moving forward. Not "do threat modeling" but specific questions that, if you cannot answer them, mean you are not ready to continue.
 
