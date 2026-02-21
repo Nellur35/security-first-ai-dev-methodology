@@ -147,20 +147,18 @@ Design the pipeline before any implementation. The pipeline is the formal defini
 
 **Security Gates — generate from context, not a generic list:**
 
-Use the architecture (Phase 3) and threat model (Phase 4) to select tools:
+Use the architecture (Phase 3) and threat model (Phase 4) to generate gates:
 ```
 Based on architecture.md and threat_model.md, generate CI/CD security gates:
-- Select SAST, SCA, secret scanning, container, and IaC tools for this stack
-- Map each gate to a specific threat from the threat model
-- Define what each gate proves and what it does NOT catch
+
+STANDARD GATES: Select SAST, SCA, secret scanning, container, IaC tools for this stack
+CUSTOM GATES: For each high-impact threat model risk, define a project-specific gate
+  (e.g., IAM scope validation, VPC egress checks, encryption enforcement, least-privilege verification)
+
+For every gate: map to a specific threat, define what it proves and what it does NOT catch
 ```
 
-Gate categories (tools vary by stack):
-- SAST — static analysis for code vulnerabilities
-- SCA — dependency CVE scanning
-- Secret Scanning — hardcoded credentials
-- Container Scanning — image CVEs (if applicable)
-- IaC Scanning — infra misconfigs (if applicable)
+Standard gates are common across projects. Custom gates — derived from YOUR threat model — are where the real security value lives.
 
 **Quality Gates:**
 - Coverage threshold — based on risk profile, not vanity

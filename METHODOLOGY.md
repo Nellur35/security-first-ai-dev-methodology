@@ -243,19 +243,24 @@ Based on this project's architecture and threat model:
 Architecture: [paste architecture.md or summarize: language, framework, infra, deployment target]
 Threat Model: [paste threat_model.md or summarize: top risks and trust boundaries]
 
-Generate CI/CD security gates that:
-1. Select specific SAST, SCA, secret scanning, container, and IaC tools appropriate for this stack
-2. Map each gate to a specific threat from the threat model
-3. Justify each tool choice (why this tool for this stack)
-4. Define what each gate proves and what it does NOT catch
+Generate CI/CD security gates in two categories:
+
+STANDARD GATES (select tools appropriate for this stack):
+- SAST, SCA, secret scanning, container scanning, IaC scanning
+- Justify each tool choice for this specific stack
+
+CUSTOM GATES (derived from the threat model):
+- For each high-impact risk in the threat model, define a gate that catches it
+- Examples: IAM policy scope validation, VPC egress rule checks, encryption-at-rest
+  enforcement, least-privilege verification, parameter store access auditing
+- These are project-specific — they come from YOUR threat model, not a checklist
+
+For every gate:
+- Map it to a specific threat or trust boundary
+- Define what it proves and what it does NOT catch
 ```
 
-Common gate categories (tools vary by stack):
-- **SAST** — static analysis for code vulnerabilities
-- **SCA** — dependency scanning for known CVEs
-- **Secret Scanning** — detect hardcoded credentials
-- **Container Scanning** — CVE scanning of images (if applicable)
-- **IaC Scanning** — infrastructure misconfigurations (if applicable)
+The standard gates (SAST, SCA, secrets, containers, IaC) are common across projects. The custom gates are where the real security value lives — they enforce the specific mitigations your threat model identified. A pipeline without custom gates is a generic checklist that misses your actual attack surface.
 
 ### Quality Gates
 
