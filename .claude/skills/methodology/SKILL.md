@@ -106,6 +106,8 @@ If a decision is important enough to carry forward, it belongs in the output fil
 
 For architecture, threat model, CI/CD gates, and security-critical components: recommend the user have the output reviewed by a different model architecture (e.g., Gemini if you are Claude). Different architectures fail differently.
 
+The review is a structured argument: Generator produces → Reviewer attacks → Generator defends or acknowledges → Navigator (user) rules → Generator incorporates rulings. Neither model should accept the other's position without arguing its case. The user is the final judge.
+
 ## Waiver Pattern
 
 When a rule must be broken, document: what is being skipped, why (the real reason), risk accepted, mitigation, owner, and expiry. An undocumented exception is a hidden liability.

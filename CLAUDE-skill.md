@@ -232,11 +232,18 @@ If a decision is important enough to carry forward, it belongs in the output fil
 
 - **Generator:** Produces the output for each phase
 - **Reviewer:** Different architecture, different company — finds holes
-- **Judge:** The human — resolves disagreements, makes final calls
+- **Navigator:** The human — resolves disagreements, makes final calls
 
-Different architectures fail differently. The genuine disagreements between them are where the real signal lives.
+The review is a structured argument, not a one-way critique:
 
-Give the reviewer an adversarial mandate: find why this is wrong, not whether it is good. The reviewer can be wrong — the human is the final judge.
+```
+1. Generator produces → 2. Reviewer attacks → 3. Generator defends or acknowledges
+→ 4. Navigator (you) rules → 5. Generator incorporates rulings
+```
+
+Neither model should accept the other's position without arguing its case. The Generator must defend sound decisions. The Reviewer must not back down on valid findings. The genuine disagreements are where your judgment as navigator matters most.
+
+Give the reviewer an adversarial mandate: find why this is wrong, not whether it is good. Feed findings back to the generator and let it argue back. Do not automatically side with either model — both can be wrong.
 
 Use for: architecture decisions, threat model, CI/CD gate definitions, security-critical components.
 
