@@ -82,7 +82,7 @@ Copy `CLAUDE-skill.md` to your project root alongside your existing `CLAUDE.md`.
 
 ### As a reference document
 
-Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked rationale for every decision.
+Read [`METHODOLOGY.md`](METHODOLOGY.md) — starts with a 15-minute Quick Start and full reference with worked rationale for every decision.
 
 ---
 

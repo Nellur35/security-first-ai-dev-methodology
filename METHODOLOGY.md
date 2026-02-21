@@ -6,6 +6,49 @@
 
 ---
 
+## Quick Reference
+
+| Phase | What You Do | Output | Gate Question |
+|-------|------------|--------|---------------|
+| 1. Problem | Define the real-world need | Problem statement (2-3 sentences) | What breaks if this isn't built? Why is code the right solution? |
+| 2. Requirements | Define what the system does and doesn't do | `requirements.md` | Is every requirement testable? What is out of scope? |
+| 3. Architecture | Design components, boundaries, interfaces | `architecture.md` | Can every component be tested in isolation? |
+| 3.5 Spike | Test unverified assumptions (optional) | Updated `architecture.md` | Was the assumption validated or disproven? |
+| 4. Threat Model | Attack every trust boundary | `threat_model.md` | What is the worst an adversary can do here? |
+| 5. CI/CD | Build the pipeline that defines "done" | Pipeline config + dummy product | What does a passing pipeline actually prove? |
+| 6. Tasks | Break work into pipeline-validatable units | `tasks.md` | Which gate validates each task? |
+| 7. Implementation | Write code — tests alongside, not after | Working code | Does the full pipeline pass? |
+| 8. Production | Deploy, monitor, feed failures back | Live system + new tests | What did production catch that the pipeline missed? |
+
+Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile. Each phase gets its own conversation — the output file is the only context that carries forward.
+
+---
+
+## 15-Minute Quick Start
+
+Try the methodology on a trivial project before reading the full document. This proves it works before asking for your time.
+
+**Project:** A URL shortener API.
+
+**Phase 1 — Problem (2 min):**
+> "What problem does a URL shortener solve? What breaks without it? Why is code the right solution?"
+
+**Phase 2 — Requirements (3 min):**
+> "Generate requirements.md for a URL shortener API. Include: functional requirements, non-functional requirements, explicit exclusions, definition of done. Add a Decisions & Rejected Alternatives section."
+
+**Phase 3 — Architecture (3 min):**
+> "Based on this requirements.md, design the architecture. Component diagram, interfaces, dependency injection boundaries. Every component must be testable in isolation. Include Decisions & Rejected Alternatives."
+
+**Phase 4 — Threat Model (3 min):**
+> "Based on this architecture.md, threat model every trust boundary. What can an adversary do? What is the blast radius? How do you mitigate?"
+
+**Phase 5 — CI/CD (4 min):**
+> "Based on this architecture.md and threat_model.md, generate a CI/CD pipeline config. Map each security gate to a specific threat. Build a dummy product that passes every gate."
+
+**Result:** You now have a problem statement, requirements, architecture, threat model, pipeline, and dummy product — all in 15 minutes. Now read the full methodology below to understand the guardrails that prevent the 10 ways this usually goes wrong.
+
+---
+
 ## The Core Philosophy
 
 Models are statistical machines. Their output is what you are statistically most likely to want to hear based on your prompt. They are geniuses that need to be led by the hand.
@@ -192,11 +235,27 @@ The pipeline shape follows from the architecture and threat model. Do not use te
 
 ### Security Gates
 
-- **SAST** — static analysis for vulnerabilities in code (Semgrep, Bandit, CodeQL)
-- **SCA** — dependency scanning for known CVEs (Snyk, Dependabot, OWASP Dependency-Check)
-- **Secret Scanning** — detect hardcoded credentials (Trufflehog, GitLeaks)
-- **Container Scanning** — CVE scanning of Docker images (Trivy, AWS Inspector)
-- **IaC Scanning** — misconfigurations in Terraform/CloudFormation (Checkov, tfsec)
+Do not pick tools from a generic list. The right security gates follow from your architecture (Phase 3) and threat model (Phase 4). Use this prompt to generate a project-specific pipeline:
+
+```
+Based on this project's architecture and threat model:
+
+Architecture: [paste architecture.md or summarize: language, framework, infra, deployment target]
+Threat Model: [paste threat_model.md or summarize: top risks and trust boundaries]
+
+Generate CI/CD security gates that:
+1. Select specific SAST, SCA, secret scanning, container, and IaC tools appropriate for this stack
+2. Map each gate to a specific threat from the threat model
+3. Justify each tool choice (why this tool for this stack)
+4. Define what each gate proves and what it does NOT catch
+```
+
+Common gate categories (tools vary by stack):
+- **SAST** — static analysis for code vulnerabilities
+- **SCA** — dependency scanning for known CVEs
+- **Secret Scanning** — detect hardcoded credentials
+- **Container Scanning** — CVE scanning of images (if applicable)
+- **IaC Scanning** — infrastructure misconfigurations (if applicable)
 
 ### Quality Gates
 
@@ -316,7 +375,7 @@ If both models agree, it is probably right. If both models disagree, you have a 
 
 ## Reasoning Pipeline for Complex Decisions
 
-When facing ambiguous or high-stakes decisions at any phase, apply structured reasoning before prompting. This prevents the model from filling ambiguity with statistically plausible but wrong answers.
+When facing ambiguous or high-stakes decisions at any phase, apply structured reasoning before prompting.
 
 The full reasoning pipeline reference -- including framework descriptions, pipeline variants, selection logic, and testing findings -- is in [`reasoning-pipeline.md`](./reasoning-pipeline.md).
 
@@ -355,7 +414,7 @@ The pipeline's value scales with problem complexity. For simple problems it prod
 
 Each phase gets its own conversation. Never run the entire methodology in a single chat session.
 
-Context windows are finite. A conversation that spans all eight phases will eventually degrade — the model loses track of early decisions, contradicts itself, and fills gaps with statistically plausible but wrong answers. This is not a limitation to work around. It is a constraint to design for.
+Context windows are finite. A conversation that spans all eight phases will degrade — the model loses track of early decisions and contradicts itself. This is not a limitation to work around. It is a constraint to design for.
 
 ### The Handoff Principle
 
@@ -412,31 +471,6 @@ The waiver does not need to be formal. It can be a comment in a PR, a line in a 
 
 ---
 
-## Teaching the Methodology
-
-The intuition behind this methodology developed through building real systems with LLMs — trial, error, pushback, and verification against reality. You cannot transfer that experience through a document. What you can do is replace intuition with structure — so someone without the intuition arrives at the same decisions.
-
-The key is to convert every phase from a description into a set of questions that must be answered before moving forward. Not "do threat modeling" but specific questions that, if you cannot answer them, mean you are not ready to continue.
-
-Think of it like a pilot's checklist. Not based on judgment. Based on questions that must be checked. A pilot does not decide whether to check the fuel — they check it because the checklist says so.
-
-### The Gate Questions
-
-| Phase | You Cannot Proceed Until You Can Answer |
-|-------|----------------------------------------|
-| Problem | What breaks in the real world if this is not built? Why is code the right solution? |
-| Requirements | What does done look like in reality, not on a dashboard? What is explicitly out of scope? |
-| Architecture | Can every component be tested in isolation? Where are the dependencies? |
-| Threat Model | What is the worst thing an adversary can do here? How would this be abused at scale? |
-| CI/CD | What does a passing pipeline actually prove? Which gate catches which failure mode? |
-| Tasks | Which pipeline gate validates this task? What does failure look like? |
-| Implementation | Does the pipeline pass? Not locally — the full pipeline. |
-| Production | What failures did production surface that the pipeline missed? |
-
-If someone cannot answer the gate questions for a phase, they do not move forward. This replaces the judgment that intuition would otherwise provide.
-
----
-
 ## Working with an Existing Codebase
 
 This methodology was built for greenfield projects. Most real work involves existing code — often with technical debt, missing documentation, and decisions nobody remembers making.
@@ -471,23 +505,6 @@ The right starting point is: what problem was this built to solve, and why was i
 The feedback loop still applies. Production failures still generate new tests. The difference is that you are inheriting someone else's decisions and working within them, not designing from a clean slate.
 
 The core principle does not change: understand before you touch. The model translates the code into language you can reason about. You navigate.
-
----
-
-## The Complete Flow
-
-| Phase | Output | Gate |
-|-------|--------|------|
-| 1. Problem Definition | Problem statement | Is code the right solution? |
-| 2. Requirements | `requirements.md` | All cases defined, done is defined |
-| 3. Architecture | `architecture.md` | Testable, clean boundaries |
-| 4. Threat Model | `threat_model.md` | Attack surface addressed |
-| 5. CI/CD + Dummy Product | Pipeline + dummy product | All gates pass on dummy |
-| 6. Task Breakdown | `tasks.md` | Each task maps to a pipeline gate |
-| 7. Implementation | Working code | Full pipeline passes |
-| 8. Production | Live system + new tests | Feedback loop active |
-
-This sounds like a lot. The model does most of the work. Your job is to ensure each phase is honest before moving to the next. A model will always tell you the phase is done if you ask. Your job is to verify that it actually is.
 
 ---
 
