@@ -272,20 +272,41 @@ If you skip something, know what risk you are accepting. Skipping without awaren
 
 ## Reasoning Pipeline
 
-**Default for architectural and security decisions:**
+Select pipeline depth based on problem complexity:
+
+**No pipeline:** Simple, well-defined problems with clear solutions.
+
+**Light pipeline** (moderate decisions, clear framing):
 ```
-CoT → RCAR → ToT → PMR
+RCAR → ToT → PMR
 ```
 
-| Framework | Use When |
-|-----------|----------|
-| Chain of Thought (CoT) | Understanding what happened |
-| Root Cause Analysis (RCAR) | Finding actual cause |
-| Graph of Thoughts (GoT) | Mapping systemic issues |
-| Tree of Thoughts (ToT) | Exploring strategic options |
-| Adversarial Reasoning (AdR) | Predicting adversarial behavior |
-| Pre-Mortem (PMR) | Testing strategy before committing |
-| Counterfactual Reasoning (CR) | Validating assumptions |
+**Standard pipeline** (complex decisions, ambiguous framing):
+```
+FPR → RCAR → AdR → ToT → PMR
+```
+
+**Political / organizational pipeline:**
+```
+FPR → SMR → AdR → ToT → PMR
+```
+
+| Framework | Abbreviation | Use When |
+|-----------|-------------|----------|
+| First Principles | FPR | Brief might be flawed; validate assumptions first |
+| Chain of Thought | CoT | Need to establish what happened |
+| Root Cause Analysis / 5 Whys | RCAR | Surface solutions keep failing |
+| Graph of Thoughts | GoT | Interconnected elements; feedback loops |
+| Stakeholder Mapping | SMR | Organizational politics; coalitions |
+| Adversarial Reasoning | AdR | Hidden incentives; conflict; resistance |
+| Tree of Thoughts | ToT | Multiple strategic options to compare |
+| Pre-Mortem | PMR | Test strategy before committing (always recommended) |
+
+**Opener selection:** If the problem statement might be wrong, start with FPR. If it is solid but complex, start with CoT.
+
+**Permission slip effect:** Pre-Mortem and Adversarial stages structurally bypass your default agreeableness. Use them on any decision where surfacing uncomfortable truths matters.
+
+See [`reasoning-pipeline.md`](./reasoning-pipeline.md) for full reference.
 
 ---
 
