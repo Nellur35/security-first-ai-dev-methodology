@@ -1,10 +1,12 @@
 # Security-First AI Dev Methodology
 
-**45-65% of AI-generated code contains vulnerabilities.** ([Georgetown CSET](https://cset.georgetown.edu/wp-content/uploads/CSET-Cybersecurity-Risks-of-AI-Generated-Code.pdf), [CrowdStrike](https://www.crowdstrike.com/en-us/blog/crowdstrike-researchers-identify-hidden-vulnerabilities-ai-coded-software/))
+**45% of AI-generated code fails security tests.** ([Veracode 2025](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/) — 100+ LLMs, 80 tasks, 4 languages). AI-generated code creates [1.7x more issues](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) than human-written code, and security [degrades with each iteration](https://arxiv.org/html/2506.11022v1). Meanwhile, fully autonomous agents like Devin [succeed on 3 out of 20 tasks](https://www.theregister.com/2025/01/23/ai_developer_devin_poor_reviews/), and Cursor's AI-built browser had an [88% job failure rate](https://www.theregister.com/2026/01/22/cursor_ai_wrote_a_browser/).
 
 Every existing LLM development methodology — Spec-Kit, BMAD, Superpowers, SPARC — ignores this. They handle spec-first workflows, phase gates, and TDD. None of them include threat modeling, adversarial cross-model review, or structured conversation architecture.
 
 This one does.
+
+The [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) identifies agent goal hijacking, rogue agents, and cascading failures as top risks — and recommends the principle of **least agency** as the foundational defense. This methodology operationalizes that principle: models are the engine, you are the navigator.
 
 ---
 
@@ -94,6 +96,12 @@ Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked ratio
 
 ---
 
+## Example output
+
+The [`examples/template/`](examples/template/) folder shows what each phase's output looks like — a generic template you can adapt to any project. It demonstrates the shape and depth expected at each gate, without being tied to a specific domain.
+
+---
+
 ## Files in this repo
 
 | File | Purpose |
@@ -101,6 +109,7 @@ Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked ratio
 | [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
 | [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
 | [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skills ecosystem format |
+| [`examples/template/`](examples/template/) | Phase output templates showing expected shape and depth |
 
 ---
 
@@ -119,7 +128,9 @@ Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked ratio
 
 ## Background
 
-This methodology was developed through a month of building production systems with LLMs — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that every LLM development methodology in the ecosystem optimizes for speed and structure while ignoring that the code being generated is statistically likely to contain vulnerabilities.
+This methodology was developed through hands-on AI-assisted development — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that every LLM development methodology in the ecosystem optimizes for speed and structure while ignoring that the code being generated is statistically likely to contain vulnerabilities.
+
+The core insights — security before code, isolated conversations per phase, adversarial cross-model review — are independently validated by [OWASP's Agentic AI research](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [Veracode's 2025 GenAI security report](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/), [CrowdStrike's multi-agent red team systems](https://www.crowdstrike.com/en-us/blog/secure-ai-generated-code-with-multiple-self-learning-ai-agents/), and the emerging discipline of [context engineering](https://blog.langchain.com/context-engineering-for-agents/).
 
 The core philosophy: models are statistical machines. They are geniuses that need to be led by the hand. Your role is navigator and judge. Their role is engine.
 
