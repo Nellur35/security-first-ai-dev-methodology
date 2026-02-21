@@ -2,23 +2,13 @@
 
 **45% of AI-generated code fails security tests.** ([Veracode 2025](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/) — 100+ LLMs, 80 tasks, 4 languages). AI-generated code creates [1.7x more issues](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) than human-written code, and security [degrades with each iteration](https://arxiv.org/html/2506.11022v1). Meanwhile, fully autonomous agents like Devin [succeed on 3 out of 20 tasks](https://www.theregister.com/2025/01/23/ai_developer_devin_poor_reviews/), and Cursor's AI-built browser had an [88% job failure rate](https://www.theregister.com/2026/01/22/cursor_ai_wrote_a_browser/).
 
-Every existing LLM development methodology — Spec-Kit, BMAD, Superpowers, SPARC — ignores this. They handle spec-first workflows, phase gates, and TDD. None of them include threat modeling, adversarial cross-model review, or structured conversation architecture.
-
-This one does.
+Most LLM development methodologies focus on spec-first workflows, phase gates, and TDD — which are necessary but not sufficient. This methodology adds three things that are typically handled ad-hoc or not at all: threat modeling as a required phase, cross-model adversarial review, and structured conversation architecture that prevents context contamination between phases.
 
 The [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) identifies agent goal hijacking, rogue agents, and cascading failures as top risks — and recommends the principle of **least agency** as the foundational defense. This methodology operationalizes that principle: models are the engine, you are the navigator.
 
 ---
 
-## What makes this different
-
-| Feature | Spec-Kit | Superpowers | BMAD | **This** |
-|---------|----------|-------------|------|----------|
-| Phase-gated workflow | Yes | Yes | Yes | **Yes** |
-| Security / Threat modeling | No | No | No | **Phase 4** |
-| Conversation architecture | No | No | No | **Yes** |
-| Cross-model adversarial review | No | No | No | **Yes** |
-| Test quality (beyond coverage) | Partial | Partial | Partial | **Yes** |
+## What this adds
 
 ### 1. Security as a first-class phase
 
@@ -128,7 +118,7 @@ The [`examples/template/`](examples/template/) folder shows what each phase's ou
 
 ## Background
 
-This methodology was developed through hands-on AI-assisted development — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that every LLM development methodology in the ecosystem optimizes for speed and structure while ignoring that the code being generated is statistically likely to contain vulnerabilities.
+This methodology was developed through hands-on AI-assisted development — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that most LLM development workflows optimize for speed and structure without treating security as a load-bearing phase.
 
 The core insights — security before code, isolated conversations per phase, adversarial cross-model review — are independently validated by [OWASP's Agentic AI research](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [Veracode's 2025 GenAI security report](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/), [CrowdStrike's multi-agent red team systems](https://www.crowdstrike.com/en-us/blog/secure-ai-generated-code-with-multiple-self-learning-ai-agents/), and the emerging discipline of [context engineering](https://blog.langchain.com/context-engineering-for-agents/).
 

@@ -284,12 +284,29 @@ A single model reviewing its own output is unreliable. Models validate their own
 
 Two models from the same family share correlated blind spots. Different architectures fail differently. Claude + Gemini will surface more genuine disagreements than Claude + Claude.
 
+### The Review Loop
+
+The review is not one-directional. It is a structured argument where both models make their case and the human decides.
+
+```
+1. Generator produces phase output
+2. Reviewer attacks it (adversarial mandate: find why this is wrong)
+3. Generator responds — defends its decisions or acknowledges the gap
+4. Navigator (you) rules on each disagreement
+5. Generator incorporates the rulings and produces corrected output
+```
+
+Neither model should accept the other's position without arguing its case first. The Generator should defend sound decisions against the Reviewer's criticism. The Reviewer should not back down when the Generator pushes back if the finding is valid. The genuine disagreements — where both models have reasonable arguments — are where your judgment as navigator matters most.
+
+If both models agree, it is probably right. If both models disagree, you have a real decision to make. If one model caves immediately, the review was not adversarial enough.
+
 ### How to Use the Reviewer
 
-- Do not tell the reviewer what to look for. Let it find what the generator missed.
 - Give the reviewer an explicitly adversarial mandate: find why this is wrong, not whether it is good.
-- Do not automatically agree with the reviewer. Push back on both models.
-- The reviewer itself can be wrong. You are the final judge.
+- Do not tell the reviewer what to look for. Let it find what the generator missed.
+- Feed the reviewer's findings back to the generator. Let the generator argue back.
+- Do not automatically side with either model. Both can be wrong.
+- You are the final judge. Make the call, document the reasoning, move on.
 
 **When to use dual-model:** Architecture decisions, threat model, CI/CD gate definitions, security-critical components, anything where a mistake is expensive to fix later.
 
