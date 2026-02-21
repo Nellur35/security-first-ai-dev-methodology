@@ -145,12 +145,22 @@ Design the pipeline before any implementation. The pipeline is the formal defini
 | E2E Tests | Full system flow as a real user or system |
 | Dummy Product | Reference implementation that runs through ALL tests |
 
-**Security Gates:**
-- SAST — static analysis (Semgrep, Bandit, CodeQL)
-- SCA — dependency CVE scanning (Snyk, Dependabot, OWASP Dependency-Check)
-- Secret Scanning — hardcoded credentials (Trufflehog, GitLeaks)
-- Container Scanning — Docker image CVEs (Trivy, AWS Inspector)
-- IaC Scanning — Terraform/CloudFormation misconfigs (Checkov, tfsec)
+**Security Gates — generate from context, not a generic list:**
+
+Use the architecture (Phase 3) and threat model (Phase 4) to select tools:
+```
+Based on architecture.md and threat_model.md, generate CI/CD security gates:
+- Select SAST, SCA, secret scanning, container, and IaC tools for this stack
+- Map each gate to a specific threat from the threat model
+- Define what each gate proves and what it does NOT catch
+```
+
+Gate categories (tools vary by stack):
+- SAST — static analysis for code vulnerabilities
+- SCA — dependency CVE scanning
+- Secret Scanning — hardcoded credentials
+- Container Scanning — image CVEs (if applicable)
+- IaC Scanning — infra misconfigs (if applicable)
 
 **Quality Gates:**
 - Coverage threshold — based on risk profile, not vanity

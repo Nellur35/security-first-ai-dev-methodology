@@ -74,7 +74,7 @@ Examine: trust boundaries, data flows, authentication, authorization, external d
 ### Phase 5 — CI/CD Pipeline Design
 The pipeline is the formal definition of done. Design it before implementation.
 
-Include: unit tests, integration tests, E2E tests, dummy product, SAST, SCA, secret scanning, container scanning, IaC scanning, coverage threshold, linting, type checking.
+Include: unit tests, integration tests, E2E tests, dummy product, coverage threshold, linting, type checking. For security gates (SAST, SCA, secret scanning, container scanning, IaC scanning), select tools based on the architecture (Phase 3) and threat model (Phase 4) — do not use a generic list.
 
 **Two unbreakable rules:**
 1. Tests verify behavior against requirements — not execute lines of code.
