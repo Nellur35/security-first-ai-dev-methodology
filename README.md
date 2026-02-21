@@ -86,9 +86,9 @@ Read [`METHODOLOGY.md`](METHODOLOGY.md) — starts with a 15-minute Quick Start 
 
 ---
 
-## Example output
+## Templates
 
-The [`examples/template/`](examples/template/) folder shows what each phase's output looks like — a generic template you can adapt to any project. It demonstrates the shape and depth expected at each gate, without being tied to a specific domain.
+The [`templates/`](templates/) folder contains output templates for each phase — the expected shape and depth at each gate. Copy a template, fill in the placeholders, answer the gate questions, and the completed file becomes the input to the next phase's conversation.
 
 ---
 
@@ -99,7 +99,7 @@ The [`examples/template/`](examples/template/) folder shows what each phase's ou
 | [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
 | [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
 | [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skills ecosystem format |
-| [`examples/template/`](examples/template/) | Phase output templates showing expected shape and depth |
+| [`templates/`](templates/) | Phase output templates showing expected shape and depth |
 
 ---
 

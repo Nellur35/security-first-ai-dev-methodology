@@ -297,6 +297,20 @@ Only after Phases 1-5 are complete do you break work into implementation tasks. 
 - Be small enough to be independently testable
 - Be considered done only when it passes every gate — not when it works locally
 
+### Task Format
+
+```
+### Task [ID]: [Component name]
+Files: [what gets created or modified]
+Dependencies: [which tasks must complete first, if any]
+Acceptance criteria:
+- [ ] [Specific behavior from requirements.md] — verified by [unit/integration/E2E test]
+- [ ] [Security gate X] passes — maps to [threat_model.md risk Y]
+Pipeline gates exercised: [list which gates validate this task]
+```
+
+Order tasks so that foundational components (shared interfaces, data models, core utilities) come first. Later tasks build on earlier ones. Mark tasks that can run in parallel.
+
 **Output:** `tasks.md` with acceptance criteria for each task.
 
 ---
@@ -310,8 +324,11 @@ Now the model writes code. Not before.
 - Each task is verified by the pipeline before moving to the next
 - If the pipeline fails, fix the code — do not adjust the gate
 
-**Gate question before moving to next task:**
-- Does the full pipeline pass? Not locally — the full pipeline.
+**Per-task verification before moving to the next task:**
+
+1. All acceptance criteria from `tasks.md` checked off
+2. Full pipeline passes — not locally, the full pipeline
+3. No new warnings or regressions introduced
 
 ---
 
@@ -325,6 +342,15 @@ Passing the CI pipeline is not the end. It is the beginning of a feedback loop.
 4. Feed logs back to the model to generate new test cases
 5. Add new tests to the pipeline
 6. The pipeline becomes progressively more comprehensive
+
+### Production Finding Format
+
+```
+### Finding: [what happened]
+Failure mode: [what the pipeline missed and why]
+New test: [test case that would have caught this]
+Pipeline gate: [which gate gets this new test]
+```
 
 This is not optional maintenance. This is how the quality of the system improves over time. The tests you write before production will never be as good as the tests derived from real failure modes.
 
@@ -436,6 +462,23 @@ The output file from each phase is not documentation. It is the context handoff 
 | Implementation -> Production | Working code + test results | All implementation context |
 
 What looks like a loss of context is actually a feature. A model that does not remember why you made a decision in Phase 3 will sometimes question it in Phase 6. That is a signal — either the decision needs to be in the output file, or it needs to be reconsidered.
+
+### Cross-Model Review at Handoff Points
+
+The handoff between Phases 3→4, 4→5, and 5→6 is the natural point for cross-model review. Before starting the next phase, paste the output file into a different model with an adversarial prompt. This takes 60 seconds and catches blind spots the generator cannot see.
+
+Ready-to-use review prompts:
+
+**After Phase 3 (Architecture):**
+> Review this architecture with an adversarial mandate. Find what is wrong, not whether it is good. Check: testability of every component, hidden dependencies, missing interfaces, whether the architecture reflects the problem domain or what was easy to build. For each finding: state the issue, the impact, and what should change. `[paste architecture.md]`
+
+**After Phase 4 (Threat Model):**
+> Review this threat model with an adversarial mandate. Find what is missing, not whether it is complete. Check: every trust boundary in the architecture, IAM blast radius, IaC configuration, supply chain risks, error handling information leakage. What would an attacker target first? What is the worst case the model didn't consider? `[paste threat_model.md]`
+
+**After Phase 5 (CI/CD):**
+> Review this CI/CD pipeline with an adversarial mandate. For each gate: does it actually catch what it claims to catch? What failure modes slip through? Are the custom security gates sufficient for the threat model risks? Is the dummy product exercising every component or just the happy path? `[paste pipeline config]`
+
+Feed the reviewer's findings back to the generator and let it defend or acknowledge. You are the navigator — you decide which findings to incorporate.
 
 ### What This Solves
 
