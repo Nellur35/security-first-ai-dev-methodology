@@ -10,17 +10,19 @@ These templates show the expected shape and depth for each phase's output file. 
 | 4. Threat Model | [`phase-4-threat-model.md`](phase-4-threat-model.md) | Trust boundaries mapped. IAM blast radius analyzed. Error handling reviewed. Supply chain examined. |
 | 5. CI/CD | [`phase-5-cicd.md`](phase-5-cicd.md) | Every gate mapped to a threat or failure mode. Dummy product defined. Waivers documented. |
 | 6. Tasks | [`phase-6-tasks.md`](phase-6-tasks.md) | Every task maps to pipeline gates. Acceptance criteria tied to requirements and threat model. |
+| 7. Implementation | [`phase-7-implementation.md`](phase-7-implementation.md) | Per-task verification. Deviations from tasks.md documented. Pipeline passing. |
 | 8. Production | [`phase-8-production.md`](phase-8-production.md) | Each finding generates a new test. Pipeline evolution tracked. |
+| Review | [`review-findings.md`](review-findings.md) | Structured adversarial review. Navigator rulings on disagreements. |
 
 ## How to use these
 
 1. Copy the template for the phase you're working on
 2. Replace the bracketed placeholders with your project's specifics
 3. Answer every gate question before moving to the next phase
-4. The completed file becomes the sole input to the next phase's conversation
+4. The completed file becomes the handoff artifact to the next phase
 
 ## The key principle
 
 Each file ends with the same reminder: *"This file is the sole input to the next phase. Everything not written here does not carry forward."*
 
-If a decision matters, it goes in the file. If it's not in the file, it doesn't exist in the next conversation.
+If a decision matters, it goes in the file. If it's not in the file, it doesn't carry forward.

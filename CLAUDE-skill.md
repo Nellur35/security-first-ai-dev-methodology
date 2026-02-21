@@ -16,7 +16,7 @@ Before any other work, answer:
 
 **Output:** A clear problem statement. 2-3 sentences. Defines the real-world need, not the technical solution.
 
-**Handoff:** Give the user the problem statement and tell them to start a new conversation with it as input to Phase 2.
+**Handoff artifact:** problem statement → Phase 2.
 
 ---
 
@@ -44,7 +44,7 @@ Cover:
 
 If requirements are unclear, stop and resolve them. Speed gained by skipping clarity is always paid back with interest.
 
-**Handoff:** Give the user `requirements.md` and tell them to start a new conversation with it as input to Phase 3.
+**Handoff artifact:** `requirements.md` → Phase 3.
 
 ---
 
@@ -83,7 +83,7 @@ Keeping Spike code out of production is a team norm, not a technical control. Pr
 
 **Phase 3 Output:** `architecture.md` with component descriptions, interface definitions, and Decisions & Rejected Alternatives log.
 
-**Handoff:** Give the user `architecture.md` and tell them to start a new conversation with it as input to Phase 4. Also provide this review prompt they can paste into a different model (e.g., Gemini):
+**Handoff artifact:** `architecture.md` → Phase 4. Offer this adversarial review prompt for a different model:
 
 ```
 Review this architecture with an adversarial mandate. Find what is wrong, not whether it is good.
@@ -119,7 +119,10 @@ For every component and trust boundary, ask:
 | Infrastructure & Cloud Boundaries | Are execution roles, parameter stores, and KMS keys explicitly scoped or implicitly broad? |
 | IAM Blast Radius | If this execution role is hijacked, what is the worst case? |
 | IaC & Configuration | Can a misconfigured SSM parameter or security group bypass all application-level controls? |
-| Supply Chain | Are dependencies pinned? Could a compromised package bypass security controls entirely? |
+| Runtime Security | What happens after deployment? Container escape, SSRF, memory corruption? |
+| Secrets Lifecycle | How are secrets provisioned, rotated, and revoked? What if a secret leaks? |
+| Data Lifecycle | Where does data live, move, and die? Is deletion real or soft? |
+| Supply Chain | Are dependencies pinned? Could a compromised package, CI/CD action, IaC module, or the LLM itself bypass security controls? |
 
 **Cloud reality check:** In modern cloud environments, the application code is often the least interesting target. Catastrophic failures happen outside the code — in misconfigured IAM roles, exposed parameter stores, or infrastructure that was never threat modeled.
 
@@ -130,7 +133,7 @@ For every component and trust boundary, ask:
 
 **Output:** `threat_model.md` with identified risks, impact ratings, and mitigations.
 
-**Handoff:** Give the user `threat_model.md` and tell them to start a new conversation with it as input to Phase 5. Also provide this review prompt:
+**Handoff artifact:** `threat_model.md` → Phase 5. Offer this adversarial review prompt for a different model:
 
 ```
 Review this threat model with an adversarial mandate. Find what is missing, not whether it is
@@ -188,7 +191,7 @@ Standard gates are common across projects. Custom gates — derived from YOUR th
 
 **Output:** Pipeline config files + dummy product + all gate definitions.
 
-**Handoff:** Give the user the pipeline config and dummy product, and tell them to start a new conversation with these as input to Phase 6. Also provide this review prompt:
+**Handoff artifacts:** pipeline config + dummy product + `requirements.md` + `threat_model.md` → Phase 6. Offer this adversarial review prompt for a different model:
 
 ```
 Review this CI/CD pipeline with an adversarial mandate. For each gate: does it actually catch
@@ -225,7 +228,7 @@ Order tasks so that foundational components (shared interfaces, data models, cor
 
 **Output:** `tasks.md` with acceptance criteria tied to pipeline gates.
 
-**Handoff:** Give the user `tasks.md` and tell them to start a new conversation with it as input to Phase 7.
+**Handoff artifact:** `tasks.md` → Phase 7.
 
 ---
 
@@ -242,7 +245,7 @@ Now write code. Not before.
 2. Full pipeline passes — not locally, the full pipeline
 3. No new warnings or regressions introduced
 
-**Handoff:** Give the user the working code and test results, and tell them to start a new conversation for Phase 8 production monitoring.
+**Handoff artifact:** working code + test results → Phase 8.
 
 ---
 
@@ -267,23 +270,36 @@ The tests derived from real failure modes will always be better than tests writt
 
 ---
 
-## Conversation Architecture
+## Context Handoff
 
-Each phase gets its own conversation. Never run the entire methodology in a single chat session.
+The output file from each phase is the handoff artifact. The tool manages context naturally — the methodology defines what carries forward.
 
-The output file from each phase is the context handoff to the next phase. Nothing else carries over.
+| Phase | Handoff Artifact |
+|-------|-----------------|
+| 1 → 2 | Problem statement |
+| 2 → 3 | `requirements.md` |
+| 3 → 4 | `architecture.md` |
+| 4 → 5 | `threat_model.md` |
+| 5 → 6 | Pipeline config + dummy product + `requirements.md` + `threat_model.md` |
+| 6 → 7 | `tasks.md` |
+| 7 → 8 | Working code + test results |
 
-| Phase Transition | Carry Forward |
-|-----------------|---------------|
-| Problem → Requirements | Problem statement |
-| Requirements → Architecture | requirements.md |
-| Architecture → Threat Model | architecture.md |
-| Threat Model → CI/CD | threat_model.md |
-| CI/CD → Tasks | Pipeline config + dummy product |
-| Tasks → Implementation | tasks.md |
-| Implementation → Production | Working code + test results |
+Phase 6 takes multiple inputs — task acceptance criteria must trace back to requirements and threat model risks.
 
 If a decision is important enough to carry forward, it belongs in the output file.
+
+### Phase Re-entry
+
+Implementation will reveal upstream flaws. This is not a failure — it is the process working.
+
+When Phase 7 surfaces an architecture problem, a missing requirement, or a threat not modeled:
+
+1. Identify which phase owns the flaw
+2. Re-run that phase with the current output file + the finding
+3. Work through the phase gates again with the new information
+4. Propagate changes forward through all downstream phases
+
+Document what triggered the re-entry and what changed — one sentence is enough.
 
 ---
 

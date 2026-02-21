@@ -61,12 +61,35 @@
 | [e.g., API error responses] | [e.g., Stack traces expose internal paths] | [e.g., Generic error messages externally, structured logging internally] |
 | [e.g., Log output] | [e.g., Secrets or PII in logs] | [e.g., Scrub sensitive fields before logging] |
 
+## Runtime Security
+
+| Component | Risk | Mitigation |
+|-----------|------|------------|
+| [e.g., Container runtime] | [e.g., Container escape, privilege escalation] | [e.g., Read-only filesystem, non-root user, seccomp profile] |
+| [e.g., Network egress] | [e.g., SSRF, data exfiltration via outbound calls] | [e.g., Egress filtering, allowlisted destinations] |
+
+## Secrets Lifecycle
+
+| Secret | Provisioning | Rotation | Blast Radius if Leaked |
+|--------|-------------|----------|----------------------|
+| [e.g., Database credentials] | [e.g., Secrets Manager, injected at runtime] | [e.g., 90-day rotation, automated] | [e.g., Full database access — scope to specific tables] |
+| [e.g., API keys] | [e.g., Environment variable] | [e.g., Manual] | [e.g., Third-party service abuse — add IP allowlist] |
+
+## Data Lifecycle
+
+| Data Type | At Rest | In Transit | Deletion | Access Control |
+|-----------|---------|-----------|----------|---------------|
+| [e.g., User PII] | [e.g., Encrypted, S3 SSE-KMS] | [e.g., TLS 1.3] | [e.g., Hard delete after 30 days] | [e.g., Service role only] |
+
 ## Supply Chain
 
 | Dependency | Risk | Mitigation |
 |-----------|------|------------|
 | [e.g., npm packages] | [e.g., Malicious package update] | [e.g., Lock file, SCA scanning, pin versions] |
 | [e.g., Base container image] | [e.g., Compromised upstream image] | [e.g., Pin digest, scan with Trivy] |
+| [e.g., CI/CD actions] | [e.g., Compromised third-party action] | [e.g., Pin to commit SHA, audit action source] |
+| [e.g., IaC modules] | [e.g., Malicious Terraform module] | [e.g., Pin version, internal module registry] |
+| [e.g., LLM-generated code] | [e.g., Model suggests vulnerable patterns] | [e.g., SAST scanning, human review of security-critical paths] |
 
 ## Gate Questions
 

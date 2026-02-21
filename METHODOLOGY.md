@@ -71,7 +71,7 @@ Phases 1 through 5 are load-bearing walls. You do not sprint your way into a fou
 
 Phase 6 onwards is Agile. Task breakdown is sprint planning. Implementation is sprint execution. The production feedback loop is your retrospective feeding the next cycle. The methodology is not Waterfall — it is sequential where sequencing is load-bearing, and iterative everywhere else.
 
-This is how mature engineering organizations actually work. The Agile versus Waterfall debate is mostly a junior developer argument. Senior engineers pick the right model for the layer they are working on.
+This is how mature engineering organizations actually work. The Agile versus Waterfall debate often misses the point. Experienced engineers pick the right model for the layer they are working on.
 
 ### On Speed
 
@@ -205,7 +205,10 @@ Security controls designed at this stage cost a fraction of what they cost after
 | Infrastructure & Cloud Boundaries | Where does code interact with the cloud provider? Are execution roles, parameter stores, and KMS keys explicitly scoped or implicitly broad? |
 | IAM Blast Radius | If this execution role is hijacked, what is the worst case? What does it have access to beyond what it needs? |
 | IaC & Configuration | Are infrastructure definitions version controlled and scanned? Can a misconfigured SSM parameter or overly permissive security group bypass all application-level controls? |
-| Supply Chain | Are dependencies pinned? Could a compromised package or container image bypass your security controls entirely? |
+| Runtime Security | What happens after deployment? Container escape, SSRF, memory corruption, side-channel attacks? |
+| Secrets Lifecycle | How are secrets provisioned, rotated, and revoked? What is the blast radius if a secret leaks? |
+| Data Lifecycle | Where does data live, move, and die? Is deletion real or soft? Who has access at each stage? |
+| Supply Chain | Are dependencies, CI/CD actions, IaC modules, build plugins, and dev tooling pinned? Could the LLM itself introduce compromised code? |
 
 **Cloud reality check:** In modern cloud environments the application code is often the least interesting target. Catastrophic failures happen outside the code — in misconfigured IAM roles, exposed parameter stores, or infrastructure that was never threat modeled. Treat the infrastructure with the same adversarial rigor as the application.
 
@@ -364,15 +367,15 @@ A single model reviewing its own output is unreliable. Models validate their own
 
 ### Structure
 
-| Role | Model | Mandate |
-|------|-------|---------|
-| Generator | Opus 4.6 / Sonnet 4.5 | Produce the output for each phase |
-| Reviewer | Gemini 3 Pro / different architecture | Find holes in logic, security, completeness |
+| Role | What | Mandate |
+|------|------|---------|
+| Generator | The model producing the phase output | Produce the output for each phase |
+| Reviewer | A different model architecture (different company, different training) | Find holes in logic, security, completeness |
 | Judge | You | Resolve genuine disagreements, make final calls |
 
 ### Why Different Architectures
 
-Two models from the same family share correlated blind spots. Different architectures fail differently. Claude + Gemini will surface more genuine disagreements than Claude + Claude.
+Two models from the same family share correlated blind spots. Different architectures fail differently. Models from different companies will surface more genuine disagreements than two instances of the same model.
 
 ### The Review Loop
 
@@ -441,27 +444,36 @@ The pipeline's value scales with problem complexity. For simple problems it prod
 
 ---
 
-## Conversation Architecture
+## Context Handoff
 
-Each phase gets its own conversation. Never run the entire methodology in a single chat session.
+The output file from each phase is the handoff artifact to the next phase. Modern agentic tools (Claude Code, Cursor, Kiro, and others) manage context naturally — through compaction, file-based context, or session architecture. The methodology does not prescribe how your tool manages sessions. It defines what carries forward.
 
-Context windows are finite. A conversation that spans all eight phases will degrade — the model loses track of early decisions and contradicts itself. This is not a limitation to work around. It is a constraint to design for.
+### Handoff Artifacts
 
-### The Handoff Principle
+| Phase | Handoff Artifact |
+|-------|-----------------|
+| Problem → Requirements | Problem statement |
+| Requirements → Architecture | `requirements.md` |
+| Architecture → Threat Model | `architecture.md` |
+| Threat Model → CI/CD | `threat_model.md` |
+| CI/CD → Tasks | Pipeline config + dummy product + `requirements.md` + `threat_model.md` |
+| Tasks → Implementation | `tasks.md` |
+| Implementation → Production | Working code + test results |
 
-The output file from each phase is not documentation. It is the context handoff to the next phase. You start a new conversation, feed it the output file, and continue. Nothing else carries over.
+Phase 6 takes multiple inputs because task acceptance criteria must trace back to requirements and threat model risks. The traceability demands it.
 
-| Phase | Input to Next Conversation | What Gets Left Behind |
-|-------|---------------------------|----------------------|
-| Problem -> Requirements | Problem statement | All exploration and discussion |
-| Requirements -> Architecture | `requirements.md` | All requirement negotiations |
-| Architecture -> Threat Model | `architecture.md` | All design alternatives considered |
-| Threat Model -> CI/CD | `threat_model.md` | All threat analysis discussion |
-| CI/CD -> Tasks | Pipeline config + dummy product | All gate design decisions |
-| Tasks -> Implementation | `tasks.md` | All task breakdown discussion |
-| Implementation -> Production | Working code + test results | All implementation context |
+### Phase Re-entry
 
-What looks like a loss of context is actually a feature. A model that does not remember why you made a decision in Phase 3 will sometimes question it in Phase 6. That is a signal — either the decision needs to be in the output file, or it needs to be reconsidered.
+Implementation will reveal upstream flaws. This is not a failure — it is the process working.
+
+When Phase 7 surfaces an architecture problem, a missing requirement, or a threat not modeled:
+
+1. Identify which phase owns the flaw (e.g., architecture → Phase 3, missing requirement → Phase 2)
+2. Re-run that phase with the current output file + the finding
+3. Work through the phase gates again with the new information
+4. Propagate changes forward through all downstream phases
+
+Re-entry is not a waiver. It does not need justification. Document what triggered the re-entry and what changed — one sentence is enough.
 
 ### Cross-Model Review at Handoff Points
 
@@ -480,9 +492,9 @@ Ready-to-use review prompts:
 
 Feed the reviewer's findings back to the generator and let it defend or acknowledge. You are the navigator — you decide which findings to incorporate.
 
-### What This Solves
+### Why Handoff Artifacts, Not Decision Logs
 
-Context Anchoring — feeding a growing Decision Log into every prompt — sounds like a solution to context drift but becomes the problem it tries to solve. A log that grows with every phase eventually consumes the context window. The output file approach solves context drift by design: each conversation starts clean with only what matters.
+Context Anchoring — feeding a growing Decision Log into every prompt — sounds like a solution to context drift but becomes the problem it tries to solve. A log that grows with every phase eventually consumes the context window. The handoff artifact approach solves this by design: only what matters carries forward.
 
 **Rule:** If a decision is important enough to carry forward, it belongs in the output file. If it is not in the output file, it does not carry forward.
 
