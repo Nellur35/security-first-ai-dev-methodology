@@ -301,35 +301,36 @@ Two models from the same family share correlated blind spots. Different architec
 
 When facing ambiguous or high-stakes decisions at any phase, apply structured reasoning before prompting. This prevents the model from filling ambiguity with statistically plausible but wrong answers.
 
-### Framework Selection
+The full reasoning pipeline reference -- including framework descriptions, pipeline variants, selection logic, and testing findings -- is in [`reasoning-pipeline.md`](./reasoning-pipeline.md).
 
-| If you need to... | Use |
-|--------------------|-----|
-| Understand what happened | Chain of Thought (CoT) |
-| Find root cause | Root Cause Analysis (RCAR / 5 Whys) |
-| Understand systemic issues | Graph of Thoughts (GoT) |
-| Explore strategic options | Tree of Thoughts (ToT) |
-| Predict adversarial behavior | Adversarial Reasoning (AdR) |
-| Test a strategy before committing | Pre-Mortem (PMR) |
-| Validate assumptions | Counterfactual Reasoning (CR) |
-| Navigate stakeholder dynamics | Stakeholder Mapping (SMR) |
-| Know what is actually feasible | Constraint Satisfaction (CSR) |
+### Quick Reference
 
-### Default Pipeline
-
-For most architectural or security decisions:
+**Light pipeline** (moderate decisions, clear framing):
 ```
-CoT -> RCAR -> ToT -> PMR
+RCAR -> ToT -> PMR
 ```
 
-For decisions involving people, politics, or organizational dynamics:
+**Standard pipeline** (complex decisions, ambiguous framing):
 ```
-CoT -> RCAR -> GoT -> SMR -> AdR -> ToT -> PMR
+FPR -> RCAR -> AdR -> ToT -> PMR
 ```
 
-### How to Apply
+**Political / organizational pipeline:**
+```
+FPR -> SMR -> AdR -> ToT -> PMR
+```
 
-Run the pipeline in your own thinking or explicitly in your prompt before asking the model to produce output. The model should receive a well-framed problem, not a raw question. A well-framed problem reduces the statistical noise in the model's output.
+### Key Finding: The Permission Slip Effect
+
+Pre-Mortem and Adversarial stages are not just analytical tools -- they structurally bypass the model's default agreeableness. Models suppress uncomfortable truths unless explicitly given permission to surface them. Naming a stage "Pre-Mortem" or "Adversarial Reasoning" provides that permission. In testing, critical insights like flawed premises and stakeholder conflicts appeared **only** in pipeline variants that included these stages.
+
+### When to Use
+
+- **No pipeline:** Simple, well-defined problems with clear solutions.
+- **Light (3 stages):** Moderate decisions where you need structured options and risk identification.
+- **Standard (5 stages):** Complex decisions with ambiguity, competing stakeholders, or where the brief itself might be wrong.
+
+The pipeline's value scales with problem complexity. For simple problems it produces the same answer at 3x the cost. For complex multi-stakeholder problems it is transformative.
 
 ---
 
