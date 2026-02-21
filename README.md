@@ -16,11 +16,11 @@ Threat modeling is Phase 4 — before any code is written. Not a checklist bolte
 
 ### 2. Conversation architecture
 
-Each phase gets its own conversation. The output file from each phase is the context handoff to the next. Nothing else carries over. This is not a workaround for context window limits — it is a design principle that prevents context drift, contradictions, and the slow degradation that happens when a model tries to hold an entire project in one session.
+The output file from each phase is the handoff artifact to the next. Nothing else carries forward. Modern agentic tools manage context naturally — through compaction, file-based context, or session architecture. The methodology defines what matters, the tool handles the mechanics.
 
 ### 3. Cross-model adversarial review
 
-A single model reviewing its own output is structurally unreliable. The methodology prescribes using a different model architecture (e.g., Claude + Gemini) to review security-critical decisions. Different architectures fail differently — the genuine disagreements between them are where the real signal lives.
+A single model reviewing its own output is structurally unreliable. The methodology prescribes using a different model architecture (different company, different training) to review security-critical decisions. Different architectures fail differently — the genuine disagreements between them are where the real signal lives.
 
 ---
 

@@ -29,7 +29,7 @@ Answer: What is the actual problem? Why does code solve it better than another a
 - What breaks in the real world if this is not built?
 - Why is code the right solution and not a process change, a configuration, or an existing tool?
 
-**Output:** Problem statement (2-3 sentences). **Handoff:** new conversation with problem statement as input.
+**Output:** Problem statement (2-3 sentences). **Handoff artifact:** problem statement → Phase 2.
 
 ### Phase 2 — Product Requirements
 Define what the product must do, not how it will do it.
@@ -39,7 +39,7 @@ Define what the product must do, not how it will do it.
 - What is explicitly out of scope?
 - What does done look like in reality, not on a dashboard?
 
-**Output:** `requirements.md` with Decisions & Rejected Alternatives section. **Handoff:** new conversation with `requirements.md` as input.
+**Output:** `requirements.md` with Decisions & Rejected Alternatives section. **Handoff artifact:** `requirements.md` → Phase 3.
 
 ### Phase 3 — Architecture & Design
 Design for testability: clean boundaries, dependency injection, no global state.
@@ -49,19 +49,19 @@ Design for testability: clean boundaries, dependency injection, no global state.
 - Where are the external dependencies and how are they mocked?
 - Does the architecture reflect the problem domain or what was easy to build?
 
-**Output:** `architecture.md` with component diagram, interfaces, and Decisions & Rejected Alternatives. **Handoff:** new conversation with `architecture.md` as input. Provide a review prompt the user can paste into a different model for adversarial review.
+**Output:** `architecture.md` with component diagram, interfaces, and Decisions & Rejected Alternatives. **Handoff artifact:** `architecture.md` → Phase 4. Offer adversarial review prompt for a different model.
 
 ### Phase 4 — Threat Modeling
 For every component and trust boundary, ask: What does an adversary see? What can they manipulate? What is the worst outcome?
 
-Examine: trust boundaries, data flows, authentication, authorization, external dependencies, error handling, IAM blast radius, IaC configuration, supply chain.
+Examine: trust boundaries, data flows, authentication, authorization, external dependencies, error handling, IAM blast radius, IaC configuration, supply chain, runtime security, secrets lifecycle, data lifecycle.
 
 **Gate — do not proceed until answered:**
 - What is the worst thing an adversary can do at each trust boundary?
 - If the IAM execution role is compromised, what is the blast radius?
 - Does the IaC have the same threat coverage as the application code?
 
-**Output:** `threat_model.md` with risks, impact ratings, and mitigations. **Handoff:** new conversation with `threat_model.md` as input. Provide a review prompt for adversarial review by a different model.
+**Output:** `threat_model.md` with risks, impact ratings, and mitigations. **Handoff artifact:** `threat_model.md` → Phase 5. Offer adversarial review prompt for a different model.
 
 ### Phase 5 — CI/CD Pipeline Design
 The pipeline is the formal definition of done. Design it before implementation.
@@ -77,32 +77,48 @@ Include: unit tests, integration tests, E2E tests, dummy product, coverage thres
 - Which gate catches which failure mode?
 - Does the dummy product exercise every component?
 
-**Output:** Pipeline config + dummy product + gate definitions. **Handoff:** new conversation with pipeline config + dummy product as input. Provide a review prompt for adversarial review by a different model.
+**Output:** Pipeline config + dummy product + gate definitions. **Handoff artifacts:** pipeline config + dummy product + `requirements.md` + `threat_model.md` → Phase 6. Offer adversarial review prompt for a different model.
 
 ### Phase 6 — Task Breakdown
 Each task must: produce a pipeline-validatable component, have acceptance criteria tied to pipeline gates, be independently testable, be done only when it passes every gate.
 
+Phase 6 takes multiple inputs — task acceptance criteria must trace back to requirements and threat model risks.
+
 Task format: `### Task [ID]: [Component] / Files: [paths] / Dependencies: [prior tasks] / Acceptance criteria: [behavior from requirements.md verified by specific test, security gate mapped to threat_model.md risk] / Pipeline gates exercised: [list]`
 
-**Output:** `tasks.md` with acceptance criteria tied to pipeline gates. **Handoff:** new conversation with `tasks.md` as input.
+**Output:** `tasks.md` with acceptance criteria tied to pipeline gates. **Handoff artifact:** `tasks.md` → Phase 7.
 
 ### Phase 7 — Implementation
 Write tests alongside code. Commit only what passes the full pipeline. If the pipeline fails, fix the code — do not adjust the gate. Before moving to next task: all acceptance criteria checked, full pipeline passes, no new regressions.
 
-**Handoff:** Give the user working code + test results for Phase 8 production monitoring.
+**Handoff artifact:** working code + test results → Phase 8.
 
 ### Phase 8 — Production Feedback Loop
 Deploy, monitor, collect failure patterns, generate new tests, feed them back into the pipeline. For each finding, capture: what happened, what the pipeline missed, the new test case, which gate gets it.
 
-## Conversation Architecture
+## Context Handoff
 
-Each phase gets its own conversation. The output file is the context handoff. Nothing else carries over.
+The output file from each phase is the handoff artifact. It carries forward what matters — the tool manages context naturally.
 
-If a decision is important enough to carry forward, it belongs in the output file. If it is not in the output file, it does not carry forward.
+| Phase | Handoff Artifact |
+|-------|-----------------|
+| 1 → 2 | Problem statement |
+| 2 → 3 | `requirements.md` |
+| 3 → 4 | `architecture.md` |
+| 4 → 5 | `threat_model.md` |
+| 5 → 6 | Pipeline config + dummy product + `requirements.md` + `threat_model.md` |
+| 6 → 7 | `tasks.md` |
+| 7 → 8 | Working code + test results |
+
+If a decision matters, it goes in the output file. If it is not in the output file, it does not carry forward.
+
+### Phase Re-entry
+
+When implementation reveals upstream flaws: identify which phase owns the flaw, re-run that phase with the current output + the finding, propagate changes forward. Document what triggered re-entry and what changed.
 
 ## Dual-Model Review
 
-For architecture, threat model, CI/CD gates, and security-critical components: recommend the user have the output reviewed by a different model architecture (e.g., Gemini if you are Claude). Different architectures fail differently.
+For architecture, threat model, CI/CD gates, and security-critical components: recommend the user have the output reviewed by a different model architecture (different company, different training). Different architectures fail differently.
 
 The review is a structured argument: Generator produces → Reviewer attacks → Generator defends or acknowledges → Navigator (user) rules → Generator incorporates rulings. Neither model should accept the other's position without arguing its case. The user is the final judge.
 
@@ -112,9 +128,10 @@ When a rule must be broken, document: what is being skipped, why (the real reaso
 
 ## Reasoning Pipeline
 
-For complex decisions, apply structured reasoning:
-- Default: `CoT -> RCAR -> ToT -> PMR`
-- With stakeholder dynamics: `CoT -> RCAR -> GoT -> SMR -> AdR -> ToT -> PMR`
+Select pipeline depth based on problem complexity:
+- Light: `RCAR → ToT → PMR`
+- Standard: `FPR → RCAR → AdR → ToT → PMR`
+- Political: `FPR → SMR → AdR → ToT → PMR`
 
 ## Minimal Viable Track
 
