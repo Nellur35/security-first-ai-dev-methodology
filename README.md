@@ -94,17 +94,6 @@ Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked ratio
 
 ---
 
-## Worked example
-
-The [`examples/cloudjanitor/`](examples/cloudjanitor/) folder shows Phases 1-5 applied to a real project in development — an AI-powered AWS security configuration agent. This is not a toy example. It is the actual foundation work for a system being built.
-
-It demonstrates:
-- How Phase 4 threat modeling catches IAM blast radius issues before any code exists
-- How Phase 5 gate questions ("What does a passing pipeline actually prove?") prevent the most common CI theater failure
-- How conversation architecture keeps each phase clean
-
----
-
 ## Files in this repo
 
 | File | Purpose |
@@ -112,7 +101,6 @@ It demonstrates:
 | [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
 | [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
 | [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skills ecosystem format |
-| [`examples/cloudjanitor/`](examples/cloudjanitor/) | Worked example: Phases 1-5 applied to a real project |
 
 ---
 
