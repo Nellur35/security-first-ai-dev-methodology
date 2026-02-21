@@ -1,0 +1,148 @@
+# Security-First AI Dev Methodology
+
+**45-65% of AI-generated code contains vulnerabilities.** ([Georgetown CSET](https://cset.georgetown.edu/wp-content/uploads/CSET-Cybersecurity-Risks-of-AI-Generated-Code.pdf), [CrowdStrike](https://www.crowdstrike.com/en-us/blog/crowdstrike-researchers-identify-hidden-vulnerabilities-ai-coded-software/))
+
+Every existing LLM development methodology — Spec-Kit, BMAD, Superpowers, SPARC — ignores this. They handle spec-first workflows, phase gates, and TDD. None of them include threat modeling, adversarial cross-model review, or structured conversation architecture.
+
+This one does.
+
+---
+
+## What makes this different
+
+| Feature | Spec-Kit | Superpowers | BMAD | **This** |
+|---------|----------|-------------|------|----------|
+| Phase-gated workflow | Yes | Yes | Yes | **Yes** |
+| Security / Threat modeling | No | No | No | **Phase 4** |
+| Conversation architecture | No | No | No | **Yes** |
+| Cross-model adversarial review | No | No | No | **Yes** |
+| Test quality (beyond coverage) | Partial | Partial | Partial | **Yes** |
+
+### 1. Security as a first-class phase
+
+Threat modeling is Phase 4 — before any code is written. Not a checklist bolted on after implementation. Every trust boundary, IAM blast radius, IaC configuration, and supply chain dependency is examined with adversarial intent.
+
+### 2. Conversation architecture
+
+Each phase gets its own conversation. The output file from each phase is the context handoff to the next. Nothing else carries over. This is not a workaround for context window limits — it is a design principle that prevents context drift, contradictions, and the slow degradation that happens when a model tries to hold an entire project in one session.
+
+### 3. Cross-model adversarial review
+
+A single model reviewing its own output is structurally unreliable. The methodology prescribes using a different model architecture (e.g., Claude + Gemini) to review security-critical decisions. Different architectures fail differently — the genuine disagreements between them are where the real signal lives.
+
+---
+
+## The phases
+
+| Phase | Output | Gate question |
+|-------|--------|---------------|
+| 1. Problem Definition | Problem statement | What breaks if this isn't built? Why is code the right solution? |
+| 2. Requirements | `requirements.md` | Is every requirement testable? What is explicitly out of scope? |
+| 3. Architecture | `architecture.md` | Can every component be tested in isolation? |
+| 4. Threat Model | `threat_model.md` | What is the worst thing an adversary can do at each trust boundary? |
+| 5. CI/CD + Dummy Product | Pipeline config | What does a passing pipeline actually prove? |
+| 6. Task Breakdown | `tasks.md` | Which pipeline gate validates each task? |
+| 7. Implementation | Working code | Does the full pipeline pass? |
+| 8. Production Feedback | Live system + new tests | What failures did production surface that the pipeline missed? |
+
+Phases 1-5 are load-bearing walls — sequential and non-negotiable. Phase 6 onwards is Agile.
+
+---
+
+## Quick start: Minimal Viable Track
+
+Not every project needs all eight phases at full depth. This is the 20% that delivers 80% of the value:
+
+| What | Minimum output |
+|------|----------------|
+| Problem statement | 2-3 sentences: what breaks without this, why code solves it |
+| `requirements.md` | Bullet list of what the system does and does not do |
+| Architecture sketch | Component diagram or written description of boundaries |
+| 1-2 CI/CD gates | Unit tests pass, no hardcoded secrets |
+| Dummy product | Minimal implementation that passes every gate |
+
+If you skip something, know what risk you are accepting. Skipping without awareness is the only true failure.
+
+---
+
+## Installation
+
+### As a Claude Code skill (recommended)
+
+```bash
+# Clone into your personal skills directory
+git clone https://github.com/Nellur35/security-first-ai-dev-methodology.git \
+  ~/.claude/skills/security-first-methodology
+```
+
+Or copy into a specific project:
+
+```bash
+# Copy into your project's skills directory
+mkdir -p .claude/skills/methodology
+cp security-first-ai-dev-methodology/.claude/skills/methodology/SKILL.md \
+  .claude/skills/methodology/SKILL.md
+```
+
+### As a CLAUDE.md drop-in
+
+Copy `CLAUDE-skill.md` to your project root alongside your existing `CLAUDE.md`. Claude Code will pick it up automatically.
+
+### As a reference document
+
+Read [`METHODOLOGY.md`](METHODOLOGY.md) — the full reference with worked rationale for every decision.
+
+---
+
+## Worked example
+
+The [`examples/cloudjanitor/`](examples/cloudjanitor/) folder shows Phases 1-5 applied to a real project in development — an AI-powered AWS security configuration agent. This is not a toy example. It is the actual foundation work for a system being built.
+
+It demonstrates:
+- How Phase 4 threat modeling catches IAM blast radius issues before any code exists
+- How Phase 5 gate questions ("What does a passing pipeline actually prove?") prevent the most common CI theater failure
+- How conversation architecture keeps each phase clean
+
+---
+
+## Files in this repo
+
+| File | Purpose |
+|------|---------|
+| [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
+| [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
+| [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skills ecosystem format |
+| [`examples/cloudjanitor/`](examples/cloudjanitor/) | Worked example: Phases 1-5 applied to a real project |
+
+---
+
+## Who this is for
+
+- Developers building production systems with AI coding tools
+- Teams that need security review integrated into their AI workflow, not bolted on
+- Anyone who has watched an LLM produce code that "looks correct" and passes tests while building the wrong thing
+
+## Who this is NOT for
+
+- Quick scripts and throwaway projects (use the Minimal Viable Track or skip this entirely)
+- Teams that want full automation with no human judgment (this methodology requires a human navigator)
+
+---
+
+## Background
+
+This methodology was developed through a month of building production systems with LLMs — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that every LLM development methodology in the ecosystem optimizes for speed and structure while ignoring that the code being generated is statistically likely to contain vulnerabilities.
+
+The core philosophy: models are statistical machines. They are geniuses that need to be led by the hand. Your role is navigator and judge. Their role is engine.
+
+---
+
+## License
+
+MIT
+
+---
+
+## Author
+
+Asaf Yashayev

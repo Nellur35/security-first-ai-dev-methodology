@@ -1,0 +1,504 @@
+# LLM-Assisted Development
+
+*A Structured Methodology for Building Real Products*
+
+**Asaf Yashayev**
+
+---
+
+## The Core Philosophy
+
+Models are statistical machines. Their output is what you are statistically most likely to want to hear based on your prompt. They are geniuses that need to be led by the hand.
+
+This changes everything about how you interact with them. Left to their own devices, they will produce code that looks correct, tests that pass, and pipelines that appear green — while building the wrong thing correctly. The entire methodology below exists to counteract this tendency.
+
+The user's role is not to code. It is to be a navigator and a judge.
+
+---
+
+## On Methodology, Speed, and the Waterfall Objection
+
+The first objection most people raise: this looks like Waterfall. Sequential phases, artifacts before code, gates before implementation. Everything the Agile movement spent twenty years arguing against.
+
+The objection is wrong, but not for the reason you might expect.
+
+### Foundation First, Sprints After
+
+Phases 1 through 5 are load-bearing walls. You do not sprint your way into a foundation — you pour it once and pour it right. A threat model you iterate on is Swiss cheese. An architecture you discover through sprints is technical debt from day one.
+
+Phase 6 onwards is Agile. Task breakdown is sprint planning. Implementation is sprint execution. The production feedback loop is your retrospective feeding the next cycle. The methodology is not Waterfall — it is sequential where sequencing is load-bearing, and iterative everywhere else.
+
+This is how mature engineering organizations actually work. The Agile versus Waterfall debate is mostly a junior developer argument. Senior engineers pick the right model for the layer they are working on.
+
+### On Speed
+
+The second objection: this is too slow for modern development.
+
+This confuses the methodology with a human team executing it manually. A human team spending weeks on architecture documents is slow. Two models running in parallel — one generating, one reviewing simultaneously — compresses the foundation phases dramatically.
+
+Phase 3 architecture design with a generator and a simultaneous adversarial reviewer does not take weeks. It takes hours. Threat modeling with dual-model review produces a more rigorous output in an afternoon than a human security review that takes a week to schedule.
+
+The phases look sequential on paper. In practice, generator and reviewer run in parallel across each phase. What appears to be a heavyweight process is a compressed, parallel workflow where the human's job is navigation and judgment — not production.
+
+The real question is not whether this is fast enough. It is whether skipping the foundation is faster in total. It never is. The time saved by skipping architecture is spent debugging. The time saved by skipping threat modeling is spent in incident response.
+
+---
+
+## Phase 1 — Define the Problem
+
+Before writing a single prompt about code, answer two questions:
+
+- What is the actual problem?
+- Why does code solve it better than another approach?
+
+This sounds obvious. It is not. Skipping this step means the model will optimize beautifully for the wrong objective. You will end up with a working product that doesn't solve the real problem.
+
+**Gate questions — do not proceed until answered:**
+- What breaks in the real world if this is not built?
+- Why is code the right solution and not a process change, a configuration, or an existing tool?
+
+**Output:** A clear problem statement. 2-3 sentences. Defines the real-world need, not the technical solution.
+
+---
+
+## Phase 2 — Product Requirements
+
+Define what the product must do, not how it will do it. Requirements are the translation layer between reality and code. Every requirement that is missing or ambiguous becomes a bug later.
+
+- **Functional requirements:** what the system does
+- **Non-functional requirements:** performance, security, reliability
+- **Explicit exclusions:** what the system deliberately does NOT do
+- **Definition of done:** what does success look like in reality, not on a dashboard
+
+**Critical:** If requirements are unclear, stop and resolve them before proceeding. Speed gained by skipping clarity is always paid back with interest.
+
+**Gate questions — do not proceed until answered:**
+- Is every requirement testable? If you cannot write a test for it, it is not a requirement.
+- What is explicitly out of scope?
+- What does done look like in reality, not in a CI dashboard?
+
+**Output:** `requirements.md` with a **Decisions & Rejected Alternatives** section.
+
+---
+
+## Phase 3 — Architecture & Design
+
+Design the system structure before any code is written. The architecture must reflect the problem domain, not convenience.
+
+### Design for Testability
+
+Testability is not a technical preference — it is an epistemological requirement. If you cannot test a component in isolation, you cannot know whether it works. This means:
+
+- Clean component boundaries
+- Dependency injection over hardcoded dependencies
+- No hidden global state
+- Clear interfaces between components
+
+Code that is hard to test is code that is poorly designed. The CI/CD pressure you will add in Phase 5 will expose this immediately. Better to design it out now.
+
+**Gate questions — do not proceed until answered:**
+- Can every component be tested in isolation?
+- Where are the external dependencies and how are they mocked in tests?
+- Does the architecture reflect the problem domain or what was easy to build?
+
+**Output:** `architecture.md` with component diagram, interface definitions, and Decisions & Rejected Alternatives log.
+
+### Decisions & Rejected Alternatives
+
+Output files are not just a list of final rules — they must capture intent. At the bottom of `requirements.md` and `architecture.md`, maintain a log of alternatives you actively rejected and why.
+
+Without this, the implementing model in Phase 7 faces micro-decisions without historical context and will confidently optimize away constraints it does not know exist.
+
+```
+Requirement: Token lifespan is exactly 15 minutes.
+Rejected: 60 minutes. Spike showed 60 minutes allows token exfiltration before anomaly detection triggers.
+```
+
+One sentence per rejected alternative. Low cost. Directly closes the context amnesia gap introduced by the handoff principle.
+
+### Phase 3.5 — The Discovery Spike (Optional but Recommended)
+
+Architecture cannot always be mapped perfectly in the abstract. If you have unverified assumptions about an API, a cloud service constraint, or performance latency — do not guess. Run a Spike.
+
+Prompt the model to write a quick throwaway script to test the assumption against reality. Measure it. Record the result. Update the architecture based on what you learned. Then discard the code.
+
+**The Golden Rule:** Spike code is radioactive. It exists to generate knowledge, not components. Its only output is an updated `.md` file.
+
+**The Limits of Mechanical Enforcement**
+
+The Conversation Architecture kill switch isolates the model — it prevents throwaway code from entering the implementation phase context window. The CI/CD gates will reject dirty scripts that lack proper tests and structure.
+
+Neither control isolates the human.
+
+The working script still exists on your local file system. Under deadline pressure, the temptation to copy-paste a Spike that already does the thing is high. A determined developer can write a meaningless mock test to drag that script past the coverage gate.
+
+Keeping Spike code out of production is a team norm, not a technical control. The pipeline cannot save you from yourself. The discipline of the human judge to delete the Spike after extracting the knowledge is the only enforcement mechanism that works.
+
+Stating this explicitly is not a weakness. Pretending a technical control exists when it is actually a cultural norm is security theater. The Waiver Pattern already demands this honesty — an undocumented exception is a hidden liability. The Spike requires the same treatment.
+
+---
+
+## Phase 4 — Threat Modeling
+
+Architecture assumes a cooperative world. Threat modeling injects reality back in. For every component and trust boundary, ask:
+
+- What does an adversary see here?
+- What can they manipulate?
+- What is the worst possible outcome?
+- How would this component be abused at scale?
+
+Security controls designed at this stage cost a fraction of what they cost after implementation. Vulnerabilities are almost always architectural decisions made without adversarial thinking.
+
+### What to Examine
+
+| Area | Questions to Ask |
+|------|-----------------|
+| Trust Boundaries | Where does control pass between components? Who is trusted? |
+| Data Flows | Where does sensitive data travel? Who can intercept it? |
+| Authentication | How does the system know who it's talking to? |
+| Authorization | How does the system decide what is allowed? |
+| External Dependencies | What happens if a dependency is compromised or unavailable? |
+| Error Handling | Do error messages leak sensitive information? |
+| Infrastructure & Cloud Boundaries | Where does code interact with the cloud provider? Are execution roles, parameter stores, and KMS keys explicitly scoped or implicitly broad? |
+| IAM Blast Radius | If this execution role is hijacked, what is the worst case? What does it have access to beyond what it needs? |
+| IaC & Configuration | Are infrastructure definitions version controlled and scanned? Can a misconfigured SSM parameter or overly permissive security group bypass all application-level controls? |
+| Supply Chain | Are dependencies pinned? Could a compromised package or container image bypass your security controls entirely? |
+
+**Cloud reality check:** In modern cloud environments the application code is often the least interesting target. Catastrophic failures happen outside the code — in misconfigured IAM roles, exposed parameter stores, or infrastructure that was never threat modeled. Treat the infrastructure with the same adversarial rigor as the application.
+
+**Gate questions — do not proceed until answered:**
+- What is the worst thing an adversary can do at each trust boundary?
+- If the IAM execution role is compromised, what is the blast radius?
+- Does the IaC have the same threat coverage as the application code?
+
+**Output:** `threat_model.md` with identified risks, impact ratings, and mitigations.
+
+---
+
+## Phase 5 — CI/CD Pipeline Design
+
+Design the pipeline before any implementation begins. The pipeline is the formal definition of done. It is not infrastructure — it is how you verify that reality matches requirements.
+
+The pipeline shape follows from the architecture and threat model. Do not use templates or defaults. Build it to match what you are actually building.
+
+### Test Strategy
+
+| Level | What it Tests | Tools |
+|-------|--------------|-------|
+| Unit Tests | Single function in isolation, all dependencies mocked | pytest, jest, go test |
+| Integration Tests | Components working together with real dependencies | Docker containers, test DBs |
+| E2E Tests | Full system flow as a real user or system | Playwright, Cypress, Postman |
+| Dummy Product | A reference implementation that runs through ALL tests | Same stack as production |
+
+### Security Gates
+
+- **SAST** — static analysis for vulnerabilities in code (Semgrep, Bandit, CodeQL)
+- **SCA** — dependency scanning for known CVEs (Snyk, Dependabot, OWASP Dependency-Check)
+- **Secret Scanning** — detect hardcoded credentials (Trufflehog, GitLeaks)
+- **Container Scanning** — CVE scanning of Docker images (Trivy, AWS Inspector)
+- **IaC Scanning** — misconfigurations in Terraform/CloudFormation (Checkov, tfsec)
+
+### Quality Gates
+
+- **Coverage threshold** — set based on risk profile, not vanity. Coverage is a side effect of good tests, never a goal.
+- **Linting** — enforce style and catch obvious errors
+- **Type checking** — where applicable
+- **Complexity limits** — flag functions that are too long or too complex
+
+### The Two Unbreakable Rules
+
+**Rule 1:** Tests must verify behavior against requirements — not execute lines of code. A test that passes without catching a real failure mode is noise that erodes trust in the pipeline.
+
+**Rule 2:** Pipeline gates must never be weakened to make things pass. If something fails, fix the code or reconsider the architecture. Lowering thresholds, adding exclusions, or skipping checks is not progress — it is hiding a decision.
+
+### The Dummy Product
+
+Build a minimal reference product that exercises every component and passes every gate. This is not a toy — it is the canary in your system. If a new test breaks the dummy product, you have caught a real problem before it reaches production code.
+
+**Gate questions — do not proceed until answered:**
+- What does a passing pipeline actually prove?
+- Which gate catches which failure mode?
+- Does the dummy product exercise every component?
+
+**Output:** Pipeline config files + dummy product + all gate definitions.
+
+---
+
+## Phase 6 — Task Breakdown
+
+Only after Phases 1-5 are complete do you break work into implementation tasks. Each task must:
+
+- Produce a component that the pipeline can validate
+- Have clear acceptance criteria tied to pipeline gates
+- Be small enough to be independently testable
+- Be considered done only when it passes every gate — not when it works locally
+
+**Output:** `tasks.md` with acceptance criteria for each task.
+
+---
+
+## Phase 7 — Implementation
+
+Now the model writes code. Not before.
+
+- Write tests alongside code, never after
+- Commit only what passes the full pipeline
+- Each task is verified by the pipeline before moving to the next
+- If the pipeline fails, fix the code — do not adjust the gate
+
+**Gate question before moving to next task:**
+- Does the full pipeline pass? Not locally — the full pipeline.
+
+---
+
+## Phase 8 — Production Feedback Loop
+
+Passing the CI pipeline is not the end. It is the beginning of a feedback loop.
+
+1. Deploy to a live environment
+2. Monitor for failures the pipeline did not catch
+3. Collect logs and error patterns
+4. Feed logs back to the model to generate new test cases
+5. Add new tests to the pipeline
+6. The pipeline becomes progressively more comprehensive
+
+This is not optional maintenance. This is how the quality of the system improves over time. The tests you write before production will never be as good as the tests derived from real failure modes.
+
+The pipeline is a living artifact, not a one-time setup.
+
+---
+
+## The Dual-Model Review System
+
+A single model reviewing its own output is unreliable. Models validate their own reasoning by design — self-critique is structurally weak. The solution is adversarial collaboration.
+
+### Structure
+
+| Role | Model | Mandate |
+|------|-------|---------|
+| Generator | Opus 4.6 / Sonnet 4.5 | Produce the output for each phase |
+| Reviewer | Gemini 3 Pro / different architecture | Find holes in logic, security, completeness |
+| Judge | You | Resolve genuine disagreements, make final calls |
+
+### Why Different Architectures
+
+Two models from the same family share correlated blind spots. Different architectures fail differently. Claude + Gemini will surface more genuine disagreements than Claude + Claude.
+
+### How to Use the Reviewer
+
+- Do not tell the reviewer what to look for. Let it find what the generator missed.
+- Give the reviewer an explicitly adversarial mandate: find why this is wrong, not whether it is good.
+- Do not automatically agree with the reviewer. Push back on both models.
+- The reviewer itself can be wrong. You are the final judge.
+
+**When to use dual-model:** Architecture decisions, threat model, CI/CD gate definitions, security-critical components, anything where a mistake is expensive to fix later.
+
+**When not required:** Boilerplate, simple scripts, obvious tasks with clear acceptance criteria.
+
+---
+
+## Reasoning Pipeline for Complex Decisions
+
+When facing ambiguous or high-stakes decisions at any phase, apply structured reasoning before prompting. This prevents the model from filling ambiguity with statistically plausible but wrong answers.
+
+### Framework Selection
+
+| If you need to... | Use |
+|--------------------|-----|
+| Understand what happened | Chain of Thought (CoT) |
+| Find root cause | Root Cause Analysis (RCAR / 5 Whys) |
+| Understand systemic issues | Graph of Thoughts (GoT) |
+| Explore strategic options | Tree of Thoughts (ToT) |
+| Predict adversarial behavior | Adversarial Reasoning (AdR) |
+| Test a strategy before committing | Pre-Mortem (PMR) |
+| Validate assumptions | Counterfactual Reasoning (CR) |
+| Navigate stakeholder dynamics | Stakeholder Mapping (SMR) |
+| Know what is actually feasible | Constraint Satisfaction (CSR) |
+
+### Default Pipeline
+
+For most architectural or security decisions:
+```
+CoT -> RCAR -> ToT -> PMR
+```
+
+For decisions involving people, politics, or organizational dynamics:
+```
+CoT -> RCAR -> GoT -> SMR -> AdR -> ToT -> PMR
+```
+
+### How to Apply
+
+Run the pipeline in your own thinking or explicitly in your prompt before asking the model to produce output. The model should receive a well-framed problem, not a raw question. A well-framed problem reduces the statistical noise in the model's output.
+
+---
+
+## Conversation Architecture
+
+Each phase gets its own conversation. Never run the entire methodology in a single chat session.
+
+Context windows are finite. A conversation that spans all eight phases will eventually degrade — the model loses track of early decisions, contradicts itself, and fills gaps with statistically plausible but wrong answers. This is not a limitation to work around. It is a constraint to design for.
+
+### The Handoff Principle
+
+The output file from each phase is not documentation. It is the context handoff to the next phase. You start a new conversation, feed it the output file, and continue. Nothing else carries over.
+
+| Phase | Input to Next Conversation | What Gets Left Behind |
+|-------|---------------------------|----------------------|
+| Problem -> Requirements | Problem statement | All exploration and discussion |
+| Requirements -> Architecture | `requirements.md` | All requirement negotiations |
+| Architecture -> Threat Model | `architecture.md` | All design alternatives considered |
+| Threat Model -> CI/CD | `threat_model.md` | All threat analysis discussion |
+| CI/CD -> Tasks | Pipeline config + dummy product | All gate design decisions |
+| Tasks -> Implementation | `tasks.md` | All task breakdown discussion |
+| Implementation -> Production | Working code + test results | All implementation context |
+
+What looks like a loss of context is actually a feature. A model that does not remember why you made a decision in Phase 3 will sometimes question it in Phase 6. That is a signal — either the decision needs to be in the output file, or it needs to be reconsidered.
+
+### What This Solves
+
+Context Anchoring — feeding a growing Decision Log into every prompt — sounds like a solution to context drift but becomes the problem it tries to solve. A log that grows with every phase eventually consumes the context window. The output file approach solves context drift by design: each conversation starts clean with only what matters.
+
+**Rule:** If a decision is important enough to carry forward, it belongs in the output file. If it is not in the output file, it does not carry forward.
+
+---
+
+## The Waiver Pattern
+
+The two unbreakable rules exist because silent violations destroy the reliability of the pipeline. But reality is not always ideal. Deadlines exist. Constraints exist. The problem is not breaking a rule — the problem is breaking a rule without acknowledging it.
+
+The waiver pattern preserves the hard line while allowing teams to function in imperfect conditions. An undocumented exception is the only true violation.
+
+### When to Use a Waiver
+
+- Weakening a coverage threshold
+- Skipping a security scan for a release
+- Skipping threat modeling under time pressure
+- Deploying without the dummy product passing all gates
+- Using one model instead of dual-model review for a critical decision
+
+### The Waiver Template
+
+| Field | What to Write |
+|-------|--------------|
+| What is being skipped or weakened | Name the specific gate, phase, or rule being bypassed |
+| Why | The actual reason — not the justification you would give in a meeting, the real one |
+| Risk accepted | What failure mode is now more likely? What is the worst case? |
+| Mitigation | What compensating control exists, if any? |
+| Owner | Who made this decision and is accountable for the risk |
+| Expiry | When will this waiver be reviewed or the rule reinstated? |
+
+The waiver does not need to be formal. It can be a comment in a PR, a line in a decision log, or a message in a team channel. What matters is that it is written, visible, and attributed.
+
+**The principle:** A documented exception is a risk management decision. An undocumented exception is a hidden liability.
+
+---
+
+## Teaching the Methodology
+
+The intuition behind this methodology developed through a month of trial, error, pushback, and verification against reality. You cannot transfer that experience through a document. What you can do is replace intuition with structure — so someone without the intuition arrives at the same decisions.
+
+The key is to convert every phase from a description into a set of questions that must be answered before moving forward. Not "do threat modeling" but specific questions that, if you cannot answer them, mean you are not ready to continue.
+
+Think of it like a pilot's checklist. Not based on judgment. Based on questions that must be checked. A pilot does not decide whether to check the fuel — they check it because the checklist says so.
+
+### The Gate Questions
+
+| Phase | You Cannot Proceed Until You Can Answer |
+|-------|----------------------------------------|
+| Problem | What breaks in the real world if this is not built? Why is code the right solution? |
+| Requirements | What does done look like in reality, not on a dashboard? What is explicitly out of scope? |
+| Architecture | Can every component be tested in isolation? Where are the dependencies? |
+| Threat Model | What is the worst thing an adversary can do here? How would this be abused at scale? |
+| CI/CD | What does a passing pipeline actually prove? Which gate catches which failure mode? |
+| Tasks | Which pipeline gate validates this task? What does failure look like? |
+| Implementation | Does the pipeline pass? Not locally — the full pipeline. |
+| Production | What failures did production surface that the pipeline missed? |
+
+If someone cannot answer the gate questions for a phase, they do not move forward. This replaces the judgment that intuition would otherwise provide.
+
+---
+
+## Working with an Existing Codebase
+
+This methodology was built for greenfield projects. Most real work involves existing code — often with technical debt, missing documentation, and decisions nobody remembers making.
+
+The approach is different but the logic is the same: build the full picture before touching anything.
+
+### The Advantage of Not Being a Developer
+
+A developer looks at existing code and sees code. The instinct is to read it, understand it, and modify it. This is often the wrong starting point.
+
+The right starting point is: what problem was this built to solve, and why was it built this way? Those are strategic questions, not technical ones. The model can read the code. You ask the questions.
+
+### The Reconstruction Process
+
+1. Feed the model the codebase and ask it to explain what problem this solves — not what it does technically, but what real-world need it serves.
+2. Ask the model to map the components and their dependencies. Build the architecture picture you would have designed in Phase 3.
+3. Ask the model what decisions were clearly made deliberately versus what looks accidental or improvised. This surfaces the invisible constraints.
+4. Run threat modeling on what exists, not on what you wish existed. The attack surface is the current system.
+5. Audit the existing CI/CD — if there is one. What does it actually test? What does it miss? What gates are there and are they meaningful?
+6. Only after you have this picture do you decide what to change and in what order.
+
+### What to Hope For, What to Prepare For
+
+| Situation | Approach |
+|-----------|----------|
+| Good documentation exists | Use it as the starting point, verify it against the actual code |
+| No documentation | The model reconstructs it — slower but doable |
+| Modular architecture | Work component by component, the methodology applies cleanly |
+| Monolith | Map it first, identify seams where components could be separated, work within constraints |
+| No CI/CD at all | Build it from scratch using the current codebase as the dummy product |
+
+The feedback loop still applies. Production failures still generate new tests. The difference is that you are inheriting someone else's decisions and working within them, not designing from a clean slate.
+
+The core principle does not change: understand before you touch. The model translates the code into language you can reason about. You navigate.
+
+---
+
+## The Complete Flow
+
+| Phase | Output | Gate |
+|-------|--------|------|
+| 1. Problem Definition | Problem statement | Is code the right solution? |
+| 2. Requirements | `requirements.md` | All cases defined, done is defined |
+| 3. Architecture | `architecture.md` | Testable, clean boundaries |
+| 4. Threat Model | `threat_model.md` | Attack surface addressed |
+| 5. CI/CD + Dummy Product | Pipeline + dummy product | All gates pass on dummy |
+| 6. Task Breakdown | `tasks.md` | Each task maps to a pipeline gate |
+| 7. Implementation | Working code | Full pipeline passes |
+| 8. Production | Live system + new tests | Feedback loop active |
+
+This sounds like a lot. The model does most of the work. Your job is to ensure each phase is honest before moving to the next. A model will always tell you the phase is done if you ask. Your job is to verify that it actually is.
+
+---
+
+## Minimal Viable Track
+
+The full methodology is designed for high-stakes, production systems where failure is expensive. Not every project needs all eight phases at full depth. If you are starting out, working on something small, or introducing this to a team for the first time — start here.
+
+This is the 20% that delivers 80% of the value. It prevents the most common failures without requiring full adoption from day one.
+
+| What | Why It Cannot Be Skipped | Minimum Acceptable Output |
+|------|--------------------------|--------------------------|
+| Problem Statement | Without this the model optimizes for the wrong thing | 2-3 sentences: what breaks without this, why code solves it |
+| `requirements.md` | Without this "done" has no definition | Bullet list of what the system does and does not do |
+| Architecture Sketch | Without this the code has no structure to test against | Component diagram or written description of main components and their boundaries |
+| 1-2 CI/CD Gates | Without this "passing" means nothing | At minimum: unit tests pass, no hardcoded secrets |
+| Dummy Product | Without this the gates are never verified end to end | Minimal implementation that passes every gate you defined |
+
+### What is Optional in the Minimal Track
+
+- Full threat model — do a 15-minute version: what is the worst thing that can happen here?
+- Dual-model review — one model is fine to start
+- Full reasoning pipeline — use your judgment for simple decisions
+- Complete security gate suite — add gates as the project grows
+- Production feedback loop — activate once the system is live
+
+Once the minimal track is working and the team is comfortable, layer in the full methodology phase by phase. Do not try to adopt everything at once.
+
+**The rule for the minimal track:** If you skip something, you must know what risk you are accepting. Skipping without awareness is the only true failure.
+
+---
+
+*The goal is not a passing pipeline. The goal is a system that correctly serves reality. The pipeline is just how you check.*
