@@ -2,9 +2,9 @@
 
 **45% of AI-generated code fails security tests.** ([Veracode 2025](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/) — 100+ LLMs, 80 tasks, 4 languages). AI-generated code creates [1.7x more issues](https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report) than human-written code, and security [degrades with each iteration](https://arxiv.org/html/2506.11022v1). Meanwhile, fully autonomous agents like Devin [succeed on 3 out of 20 tasks](https://www.theregister.com/2025/01/23/ai_developer_devin_poor_reviews/), and Cursor's AI-built browser had an [88% job failure rate](https://www.theregister.com/2026/01/22/cursor_ai_wrote_a_browser/).
 
-Most LLM development methodologies focus on spec-first workflows, phase gates, and TDD — which are necessary but not sufficient. This methodology adds three things that are typically handled ad-hoc or not at all: threat modeling as a required phase, cross-model adversarial review, and structured conversation architecture that prevents context contamination between phases.
+Most LLM development methodologies focus on spec-first workflows, phase gates, and TDD — which help but aren't enough. This methodology adds three things that are typically handled ad-hoc or not at all: threat modeling as a required phase, cross-model adversarial review, and structured conversation architecture that keeps phases from polluting each other.
 
-The [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) identifies agent goal hijacking, rogue agents, and cascading failures as top risks — and recommends the principle of **least agency** as the foundational defense. This methodology operationalizes that principle: models are the engine, you are the navigator.
+The [OWASP Top 10 for Agentic Applications (2026)](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) identifies agent goal hijacking, rogue agents, and cascading failures as top risks — and recommends the principle of **least agency** as the foundational defense. Here's how that works in practice: models are the engine, you are the navigator.
 
 ---
 
@@ -98,7 +98,9 @@ The [`templates/`](templates/) folder contains output templates for each phase �
 |------|---------|
 | [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
 | [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
-| [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skills ecosystem format |
+| [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skill — full methodology |
+| [`.claude/skills/intake/SKILL.md`](.claude/skills/intake/SKILL.md) | Claude Code skill — interactive Phase 1 intake |
+| [`tools/`](tools/) | Standalone prompts that work in any AI model |
 | [`templates/`](templates/) | Phase output templates showing expected shape and depth |
 
 ---
@@ -120,9 +122,9 @@ The [`templates/`](templates/) folder contains output templates for each phase �
 
 This methodology was developed through hands-on AI-assisted development — trial, error, pushback, and verification against reality. The security-first approach emerged from observing that most LLM development workflows optimize for speed and structure without treating security as a load-bearing phase.
 
-The core insights — security before code, isolated conversations per phase, adversarial cross-model review — are independently validated by [OWASP's Agentic AI research](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [Veracode's 2025 GenAI security report](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/), [CrowdStrike's multi-agent red team systems](https://www.crowdstrike.com/en-us/blog/secure-ai-generated-code-with-multiple-self-learning-ai-agents/), and the emerging discipline of [context engineering](https://blog.langchain.com/context-engineering-for-agents/).
+The core insights — security before code, isolated conversations per phase, adversarial cross-model review — are independently validated by [OWASP's Agentic AI research](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [Veracode's 2025 GenAI security report](https://www.veracode.com/resources/analyst-reports/2025-genai-code-security-report/), [CrowdStrike's multi-agent red team systems](https://www.crowdstrike.com/en-us/blog/secure-ai-generated-code-with-multiple-self-learning-ai-agents/), and what people are starting to call [context engineering](https://blog.langchain.com/context-engineering-for-agents/).
 
-The core philosophy: models are statistical machines. They are geniuses that need to be led by the hand. Your role is navigator and judge. Their role is engine.
+The core philosophy: models guess what you probably want to hear, and they're good enough at it to fool you. Your role is navigator and judge. Their role is engine.
 
 ---
 

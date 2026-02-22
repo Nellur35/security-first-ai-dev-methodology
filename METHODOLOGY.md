@@ -51,11 +51,9 @@ Try the methodology on a trivial project before reading the full document. This 
 
 ## The Core Philosophy
 
-Models are statistical machines. Their output is what you are statistically most likely to want to hear based on your prompt. They are geniuses that need to be led by the hand.
+Models guess what you probably want to hear. They're good at it — good enough to fool you. Left alone, they'll produce code that looks correct, tests that pass, and pipelines that appear green — while building the wrong thing correctly. That's what this methodology is for.
 
-This changes everything about how you interact with them. Left to their own devices, they will produce code that looks correct, tests that pass, and pipelines that appear green — while building the wrong thing correctly. The entire methodology below exists to counteract this tendency.
-
-The user's role is not to code. It is to be a navigator and a judge.
+Your role is navigator and judge. Not coder.
 
 ---
 
@@ -69,21 +67,15 @@ The objection is wrong, but not for the reason you might expect.
 
 Phases 1 through 5 are load-bearing walls. You do not sprint your way into a foundation — you pour it once and pour it right. A threat model you iterate on is Swiss cheese. An architecture you discover through sprints is technical debt from day one.
 
-Phase 6 onwards is Agile. Task breakdown is sprint planning. Implementation is sprint execution. The production feedback loop is your retrospective feeding the next cycle. The methodology is not Waterfall — it is sequential where sequencing is load-bearing, and iterative everywhere else.
-
-This is how mature engineering organizations actually work. The Agile versus Waterfall debate often misses the point. Experienced engineers pick the right model for the layer they are working on.
+Phase 6 onwards is Agile. Task breakdown is sprint planning. Implementation is sprint execution. The production feedback loop is your retrospective feeding the next cycle. The methodology is sequential where sequencing is load-bearing, and iterative everywhere else. Experienced engineers already do this. They pick the right model for the layer they are working on.
 
 ### On Speed
 
 The second objection: this is too slow for modern development.
 
-This confuses the methodology with a human team executing it manually. A human team spending weeks on architecture documents is slow. Two models running in parallel — one generating, one reviewing simultaneously — compresses the foundation phases dramatically.
+This confuses the methodology with a human team executing it manually. Two models running in parallel — one generating, one reviewing — compress the foundation phases dramatically. Architecture design with a simultaneous adversarial reviewer takes hours, not weeks. Threat modeling with dual-model review produces a more rigorous output in an afternoon than a human security review that takes a week to schedule.
 
-Phase 3 architecture design with a generator and a simultaneous adversarial reviewer does not take weeks. It takes hours. Threat modeling with dual-model review produces a more rigorous output in an afternoon than a human security review that takes a week to schedule.
-
-The phases look sequential on paper. In practice, generator and reviewer run in parallel across each phase. What appears to be a heavyweight process is a compressed, parallel workflow where the human's job is navigation and judgment — not production.
-
-The real question is not whether this is fast enough. It is whether skipping the foundation is faster in total. It never is. The time saved by skipping architecture is spent debugging. The time saved by skipping threat modeling is spent in incident response.
+The real question is whether skipping the foundation is faster in total. It never is. Time saved by skipping architecture is spent debugging. Time saved by skipping threat modeling is spent in incident response.
 
 ---
 
@@ -94,7 +86,7 @@ Before writing a single prompt about code, answer two questions:
 - What is the actual problem?
 - Why does code solve it better than another approach?
 
-This sounds obvious. It is not. Skipping this step means the model will optimize beautifully for the wrong objective. You will end up with a working product that doesn't solve the real problem.
+Everyone thinks they can skip this. Then the model optimizes beautifully for the wrong objective and you end up with a working product that doesn't solve the real problem.
 
 **Gate questions — do not proceed until answered:**
 - What breaks in the real world if this is not built?
@@ -113,7 +105,7 @@ Define what the product must do, not how it will do it. Requirements are the tra
 - **Explicit exclusions:** what the system deliberately does NOT do
 - **Definition of done:** what does success look like in reality, not on a dashboard
 
-**Critical:** If requirements are unclear, stop and resolve them before proceeding. Speed gained by skipping clarity is always paid back with interest.
+**Critical:** If requirements are unclear, stop and resolve them. You'll pay for it later. You always do.
 
 **Gate questions — do not proceed until answered:**
 - Is every requirement testable? If you cannot write a test for it, it is not a requirement.
@@ -130,14 +122,14 @@ Design the system structure before any code is written. The architecture must re
 
 ### Design for Testability
 
-Testability is not a technical preference — it is an epistemological requirement. If you cannot test a component in isolation, you cannot know whether it works. This means:
+If you can't test it in isolation, you can't know if it works.
 
 - Clean component boundaries
 - Dependency injection over hardcoded dependencies
 - No hidden global state
 - Clear interfaces between components
 
-Code that is hard to test is code that is poorly designed. The CI/CD pressure you will add in Phase 5 will expose this immediately. Better to design it out now.
+The CI/CD pressure in Phase 5 will expose bad design immediately. Better to fix it now.
 
 **Gate questions — do not proceed until answered:**
 - Can every component be tested in isolation?
@@ -190,7 +182,7 @@ Architecture assumes a cooperative world. Threat modeling injects reality back i
 - What is the worst possible outcome?
 - How would this component be abused at scale?
 
-Security controls designed at this stage cost a fraction of what they cost after implementation. Vulnerabilities are almost always architectural decisions made without adversarial thinking.
+Security controls designed at this stage cost a fraction of what they cost after implementation. Most vulnerabilities aren't code bugs. They're architecture decisions nobody attacked on paper first.
 
 ### What to Examine
 
@@ -223,9 +215,9 @@ Security controls designed at this stage cost a fraction of what they cost after
 
 ## Phase 5 — CI/CD Pipeline Design
 
-Design the pipeline before any implementation begins. The pipeline is the formal definition of done. It is not infrastructure — it is how you verify that reality matches requirements.
+Design the pipeline before any implementation begins. The pipeline tells you whether what you built matches what you said you'd build.
 
-The pipeline shape follows from the architecture and threat model. Do not use templates or defaults. Build it to match what you are actually building.
+The pipeline shape follows from the architecture and threat model. Don't use templates or defaults. Build it to match what you are actually building.
 
 ### Test Strategy
 
@@ -276,11 +268,11 @@ The standard gates (SAST, SCA, secrets, containers, IaC) are common across proje
 
 **Rule 1:** Tests must verify behavior against requirements — not execute lines of code. A test that passes without catching a real failure mode is noise that erodes trust in the pipeline.
 
-**Rule 2:** Pipeline gates must never be weakened to make things pass. If something fails, fix the code or reconsider the architecture. Lowering thresholds, adding exclusions, or skipping checks is not progress — it is hiding a decision.
+**Rule 2:** Pipeline gates must never be weakened to make things pass. If something fails, fix the code or reconsider the architecture. Lowering thresholds, adding exclusions, or skipping checks just hides the decision you're actually making.
 
 ### The Dummy Product
 
-Build a minimal reference product that exercises every component and passes every gate. This is not a toy — it is the canary in your system. If a new test breaks the dummy product, you have caught a real problem before it reaches production code.
+Build a minimal reference product that exercises every component and passes every gate. Think of it as the canary. If a new test breaks the dummy product, you've caught a real problem before it reaches production code.
 
 **Gate questions — do not proceed until answered:**
 - What does a passing pipeline actually prove?
@@ -355,15 +347,13 @@ New test: [test case that would have caught this]
 Pipeline gate: [which gate gets this new test]
 ```
 
-This is not optional maintenance. This is how the quality of the system improves over time. The tests you write before production will never be as good as the tests derived from real failure modes.
-
-The pipeline is a living artifact, not a one-time setup.
+Do this. The tests you write before production will never be as good as the tests derived from real failure modes.
 
 ---
 
 ## The Dual-Model Review System
 
-A single model reviewing its own output is unreliable. Models validate their own reasoning by design — self-critique is structurally weak. The solution is adversarial collaboration.
+A single model reviewing its own output is unreliable. Self-critique is structurally weak. Use adversarial collaboration instead.
 
 ### Structure
 
@@ -379,7 +369,7 @@ Two models from the same family share correlated blind spots. Different architec
 
 ### The Review Loop
 
-The review is not one-directional. It is a structured argument where both models make their case and the human decides.
+The review is a structured argument. Both models make their case. You decide.
 
 ```
 1. Generator produces phase output
@@ -440,7 +430,7 @@ Pre-Mortem and Adversarial stages are not just analytical tools -- they structur
 - **Light (3 stages):** Moderate decisions where you need structured options and risk identification.
 - **Standard (5 stages):** Complex decisions with ambiguity, competing stakeholders, or where the brief itself might be wrong.
 
-The pipeline's value scales with problem complexity. For simple problems it produces the same answer at 3x the cost. For complex multi-stakeholder problems it is transformative.
+For simple problems the pipeline produces the same answer at 3x the cost. For complex multi-stakeholder problems it is transformative.
 
 ---
 
@@ -460,7 +450,7 @@ The output file from each phase is the handoff artifact to the next phase. Moder
 | Tasks → Implementation | `tasks.md` |
 | Implementation → Production | Working code + test results |
 
-Phase 6 takes multiple inputs because task acceptance criteria must trace back to requirements and threat model risks. The traceability demands it.
+Phase 6 takes multiple inputs because task acceptance criteria must trace back to requirements and threat model risks.
 
 ### Phase Re-entry
 
@@ -494,7 +484,7 @@ Feed the reviewer's findings back to the generator and let it defend or acknowle
 
 ### Why Handoff Artifacts, Not Decision Logs
 
-Context Anchoring — feeding a growing Decision Log into every prompt — sounds like a solution to context drift but becomes the problem it tries to solve. A log that grows with every phase eventually consumes the context window. The handoff artifact approach solves this by design: only what matters carries forward.
+Context Anchoring — feeding a growing Decision Log into every prompt — sounds like a solution to context drift but becomes the problem it tries to solve. A log that grows with every phase eventually consumes the context window. Don't fight the context window. Use it. Handoff artifacts carry forward only what matters.
 
 **Rule:** If a decision is important enough to carry forward, it belongs in the output file. If it is not in the output file, it does not carry forward.
 
@@ -502,9 +492,9 @@ Context Anchoring — feeding a growing Decision Log into every prompt — sound
 
 ## The Waiver Pattern
 
-The two unbreakable rules exist because silent violations destroy the reliability of the pipeline. But reality is not always ideal. Deadlines exist. Constraints exist. The problem is not breaking a rule — the problem is breaking a rule without acknowledging it.
+Silent violations destroy pipeline reliability. But deadlines exist. Constraints exist. The problem is never breaking a rule — it's breaking one without acknowledging it.
 
-The waiver pattern preserves the hard line while allowing teams to function in imperfect conditions. An undocumented exception is the only true violation.
+An undocumented exception is the only true violation.
 
 ### When to Use a Waiver
 
@@ -519,29 +509,23 @@ The waiver pattern preserves the hard line while allowing teams to function in i
 | Field | What to Write |
 |-------|--------------|
 | What is being skipped or weakened | Name the specific gate, phase, or rule being bypassed |
-| Why | The actual reason — not the justification you would give in a meeting, the real one |
+| Why | The actual reason, not the meeting-friendly version |
 | Risk accepted | What failure mode is now more likely? What is the worst case? |
 | Mitigation | What compensating control exists, if any? |
 | Owner | Who made this decision and is accountable for the risk |
 | Expiry | When will this waiver be reviewed or the rule reinstated? |
 
-The waiver does not need to be formal. It can be a comment in a PR, a line in a decision log, or a message in a team channel. What matters is that it is written, visible, and attributed.
-
-**The principle:** A documented exception is a risk management decision. An undocumented exception is a hidden liability.
+The waiver does not need to be formal. A PR comment, a line in a decision log, a message in a team channel. Written, visible, and attributed.
 
 ---
 
 ## Working with an Existing Codebase
 
-This methodology was built for greenfield projects. Most real work involves existing code — often with technical debt, missing documentation, and decisions nobody remembers making.
-
-The approach is different but the logic is the same: build the full picture before touching anything.
+This methodology was built for greenfield projects. Most real work involves existing code — technical debt, missing documentation, decisions nobody remembers making. Build the full picture before touching anything.
 
 ### The Advantage of Not Being a Developer
 
-A developer looks at existing code and sees code. The instinct is to read it, understand it, and modify it. This is often the wrong starting point.
-
-The right starting point is: what problem was this built to solve, and why was it built this way? Those are strategic questions, not technical ones. The model can read the code. You ask the questions.
+A developer looks at existing code and sees code. The instinct is to read it, understand it, modify it. Wrong starting point. Start with: what problem was this built to solve, and why was it built this way? The model can read the code. You ask the questions.
 
 ### The Reconstruction Process
 
@@ -562,17 +546,13 @@ The right starting point is: what problem was this built to solve, and why was i
 | Monolith | Map it first, identify seams where components could be separated, work within constraints |
 | No CI/CD at all | Build it from scratch using the current codebase as the dummy product |
 
-The feedback loop still applies. Production failures still generate new tests. The difference is that you are inheriting someone else's decisions and working within them, not designing from a clean slate.
-
-The core principle does not change: understand before you touch. The model translates the code into language you can reason about. You navigate.
+The feedback loop still applies. Production failures still generate new tests. The difference is you're inheriting someone else's decisions, not designing from a clean slate. Understand before you touch.
 
 ---
 
 ## Minimal Viable Track
 
-The full methodology is designed for high-stakes, production systems where failure is expensive. Not every project needs all eight phases at full depth. If you are starting out, working on something small, or introducing this to a team for the first time — start here.
-
-This is the 20% that delivers 80% of the value. It prevents the most common failures without requiring full adoption from day one.
+Not every project needs all eight phases at full depth. Start here. This is the 20% that delivers 80% of the value.
 
 | What | Why It Cannot Be Skipped | Minimum Acceptable Output |
 |------|--------------------------|--------------------------|
@@ -590,9 +570,9 @@ This is the 20% that delivers 80% of the value. It prevents the most common fail
 - Complete security gate suite — add gates as the project grows
 - Production feedback loop — activate once the system is live
 
-Once the minimal track is working and the team is comfortable, layer in the full methodology phase by phase. Do not try to adopt everything at once.
+Once the minimal track works, layer in the full methodology phase by phase.
 
-**The rule for the minimal track:** If you skip something, you must know what risk you are accepting. Skipping without awareness is the only true failure.
+**The rule:** If you skip something, know what risk you are accepting.
 
 ---
 
