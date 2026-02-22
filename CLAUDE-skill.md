@@ -42,7 +42,7 @@ Cover:
 - Auth method: OAuth2. Rejected API keys — no rotation mechanism, higher blast radius if leaked.
 ```
 
-If requirements are unclear, stop and resolve them. Speed gained by skipping clarity is always paid back with interest.
+If requirements are unclear, stop and resolve them. You'll pay for it later. You always do.
 
 **Handoff artifact:** `requirements.md` → Phase 3.
 
