@@ -164,7 +164,7 @@ If any gate fails, do not accept it silently. Ask the specific question that clo
 Once the artifact passes the gate check, tell the user:
 
 - For greenfield: "Your problem statement is written to `problem_statement.md`. This is the handoff artifact for Phase 2 (Requirements). Feed it into Phase 2 to define what the system must do."
-- For existing projects: "Your reconstruction assessment is written to `reconstruction_assessment.md`. Based on what exists, your recommended entry point is Phase [N]. Feed this artifact into that phase."
+- For existing projects: "Your reconstruction assessment is written to `reconstruction_assessment.md`. Based on what exists, your recommended entry point is Phase [N]. Feed this artifact into that phase. Run `/audit` for a deeper scan of the existing codebase and CI/CD."
 
 ## Style Rules
 
