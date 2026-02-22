@@ -24,6 +24,22 @@ Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile. The outp
 
 ---
 
+## Start Here: Minimal Viable Track
+
+Not every project needs all eight phases at full depth. This is the 20% that delivers 80% of the value.
+
+| What | Why It Cannot Be Skipped | Minimum Output |
+|------|--------------------------|----------------|
+| Problem Statement | Without this the model optimizes for the wrong thing | 2-3 sentences: what breaks without this, why code solves it |
+| `requirements.md` | Without this "done" has no definition | Bullet list of what the system does and does not do |
+| Architecture Sketch | Without this the code has no structure to test against | Component diagram or description of boundaries |
+| 1-2 CI/CD Gates | Without this "passing" means nothing | Unit tests pass, no hardcoded secrets |
+| Dummy Product | Without this the gates are never verified end to end | Minimal implementation that passes every gate |
+
+Skip the rest if you need to. But know what risk you're accepting. Layer in the full methodology as the project grows.
+
+---
+
 ## 15-Minute Quick Start
 
 Try the methodology on a trivial project before reading the full document. This proves it works before asking for your time.
@@ -45,7 +61,7 @@ Try the methodology on a trivial project before reading the full document. This 
 **Phase 5 — CI/CD (4 min):**
 > "Based on this architecture.md and threat_model.md, generate a CI/CD pipeline config. Map each security gate to a specific threat. Build a dummy product that passes every gate."
 
-**Result:** You now have a problem statement, requirements, architecture, threat model, pipeline, and dummy product — all in 15 minutes. Now read the full methodology below to understand the guardrails that prevent the 10 ways this usually goes wrong.
+**Result:** You now have a problem statement, requirements, architecture, threat model, pipeline, and dummy product — all in 15 minutes. See [`examples/url-shortener/`](examples/url-shortener/) for what the actual outputs look like. Now read the full methodology below to understand the guardrails that prevent the 10 ways this usually goes wrong.
 
 ---
 
@@ -201,6 +217,22 @@ Security controls designed at this stage cost a fraction of what they cost after
 | Secrets Lifecycle | How are secrets provisioned, rotated, and revoked? What is the blast radius if a secret leaks? |
 | Data Lifecycle | Where does data live, move, and die? Is deletion real or soft? Who has access at each stage? |
 | Supply Chain | Are dependencies, CI/CD actions, IaC modules, build plugins, and dev tooling pinned? Could the LLM itself introduce compromised code? |
+| LLM-Specific Risks | See section below |
+
+### LLM-Specific Threats
+
+You're using AI to write this code. That's a threat vector. Treat it like one.
+
+| Threat | What It Looks Like | Detection |
+|--------|-------------------|-----------|
+| **Prompt injection via generated code** | Model produces code that executes unintended operations — e.g., a data exfiltration endpoint disguised as logging, or an overly permissive CORS config | SAST with custom rules for your auth/access patterns. Code review focused on "why is this here?" not just "does this work?" |
+| **Hallucinated dependencies** | Model imports packages that don't exist. An attacker registers the package name and publishes malware | Pin every dependency. Verify package exists and has real maintainers before adding. SCA scanning catches known vulns, not fake packages — manual check required |
+| **Insecure defaults** | Model copies patterns from training data that were fine in 2020 but are insecure now — e.g., MD5 hashing, `pickle.loads()`, `eval()`, `dangerouslySetInnerHTML` | SAST + explicit banned-pattern rules in linting config. Keep a project-specific deny list |
+| **Context window poisoning** | Large codebases or injected comments steer the model toward insecure patterns — e.g., a comment saying "// security check disabled for testing" that the model treats as an instruction | Review all model-generated code for comments and patterns that don't match your conventions. Check for unexpected config changes |
+| **Confidence without verification** | Model produces code that looks correct, passes basic tests, but has subtle logic flaws — off-by-one in auth checks, race conditions in token validation, time-of-check-to-time-of-use bugs | Tests that verify security behavior specifically: "does an expired token get rejected?", "does a concurrent request cause a double-spend?" Property-based testing for edge cases |
+| **Training data leakage** | Model embeds API keys, internal URLs, or patterns from its training data into your code | Secret scanning (gitleaks, truffleHog) as a pipeline gate. Grep for hardcoded URLs, IPs, and credential patterns |
+
+These risks exist *because* you're using AI to write the code. A methodology for AI-assisted development that doesn't threat-model the AI itself has a blind spot at its center.
 
 **Cloud reality check:** In modern cloud environments the application code is often the least interesting target. Catastrophic failures happen outside the code — in misconfigured IAM roles, exposed parameter stores, or infrastructure that was never threat modeled. Treat the infrastructure with the same adversarial rigor as the application.
 
@@ -551,30 +583,6 @@ If using Claude Code, the `/audit` skill automates steps 1-5 below. Otherwise, w
 The feedback loop still applies. Production failures still generate new tests. The difference is you're inheriting someone else's decisions, not designing from a clean slate. Understand before you touch.
 
 ---
-
-## Minimal Viable Track
-
-Not every project needs all eight phases at full depth. Start here. This is the 20% that delivers 80% of the value.
-
-| What | Why It Cannot Be Skipped | Minimum Acceptable Output |
-|------|--------------------------|--------------------------|
-| Problem Statement | Without this the model optimizes for the wrong thing | 2-3 sentences: what breaks without this, why code solves it |
-| `requirements.md` | Without this "done" has no definition | Bullet list of what the system does and does not do |
-| Architecture Sketch | Without this the code has no structure to test against | Component diagram or written description of main components and their boundaries |
-| 1-2 CI/CD Gates | Without this "passing" means nothing | At minimum: unit tests pass, no hardcoded secrets |
-| Dummy Product | Without this the gates are never verified end to end | Minimal implementation that passes every gate you defined |
-
-### What is Optional in the Minimal Track
-
-- Full threat model — do a 15-minute version: what is the worst thing that can happen here?
-- Dual-model review — one model is fine to start
-- Full reasoning pipeline — use your judgment for simple decisions
-- Complete security gate suite — add gates as the project grows
-- Production feedback loop — activate once the system is live
-
-Once the minimal track works, layer in the full methodology phase by phase.
-
-**The rule:** If you skip something, know what risk you are accepting.
 
 ---
 
