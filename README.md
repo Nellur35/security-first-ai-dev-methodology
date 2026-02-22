@@ -98,8 +98,12 @@ The [`templates/`](templates/) folder contains output templates for each phase �
 |------|---------|
 | [`METHODOLOGY.md`](METHODOLOGY.md) | Full reference document with rationale |
 | [`CLAUDE-skill.md`](CLAUDE-skill.md) | Condensed skill file for project drop-in |
-| [`.claude/skills/methodology/SKILL.md`](.claude/skills/methodology/SKILL.md) | Claude Code skill — full methodology |
-| [`.claude/skills/intake/SKILL.md`](.claude/skills/intake/SKILL.md) | Claude Code skill — interactive Phase 1 intake |
+| [`.claude/skills/methodology/`](.claude/skills/methodology/SKILL.md) | Orchestrator — routes to the right skill per phase |
+| [`.claude/skills/intake/`](.claude/skills/intake/SKILL.md) | `/intake` — interactive Phase 1 problem definition |
+| [`.claude/skills/review/`](.claude/skills/review/SKILL.md) | `/review` — adversarial review at any phase |
+| [`.claude/skills/gate-check/`](.claude/skills/gate-check/SKILL.md) | `/gate-check` — verify phase exit criteria |
+| [`.claude/skills/threat-model/`](.claude/skills/threat-model/SKILL.md) | `/threat-model` — Phase 4 threat modeling |
+| [`.claude/skills/audit/`](.claude/skills/audit/SKILL.md) | `/audit` — scan existing codebase and CI/CD |
 | [`tools/`](tools/) | Standalone prompts that work in any AI model |
 | [`templates/`](templates/) | Phase output templates showing expected shape and depth |
 

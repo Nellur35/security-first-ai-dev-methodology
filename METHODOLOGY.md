@@ -20,7 +20,7 @@
 | 7. Implementation | Write code — tests alongside, not after | Working code | Does the full pipeline pass? |
 | 8. Production | Deploy, monitor, feed failures back | Live system + new tests | What did production catch that the pipeline missed? |
 
-Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile. Each phase gets its own conversation — the output file is the only context that carries forward.
+Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile. The output file from each phase is the only context that carries forward.
 
 ---
 
@@ -161,7 +161,7 @@ Prompt the model to write a quick throwaway script to test the assumption agains
 
 **The Limits of Mechanical Enforcement**
 
-The Conversation Architecture kill switch isolates the model — it prevents throwaway code from entering the implementation phase context window. The CI/CD gates will reject dirty scripts that lack proper tests and structure.
+The handoff principle isolates the model — throwaway code doesn't enter the implementation phase context. The CI/CD gates will reject dirty scripts that lack proper tests and structure.
 
 Neither control isolates the human.
 
@@ -169,7 +169,7 @@ The working script still exists on your local file system. Under deadline pressu
 
 Keeping Spike code out of production is a team norm, not a technical control. The pipeline cannot save you from yourself. The discipline of the human judge to delete the Spike after extracting the knowledge is the only enforcement mechanism that works.
 
-Stating this explicitly is not a weakness. Pretending a technical control exists when it is actually a cultural norm is security theater. The Waiver Pattern already demands this honesty — an undocumented exception is a hidden liability. The Spike requires the same treatment.
+Pretending a technical control exists when it's actually a cultural norm is security theater. The Waiver Pattern demands this honesty. The Spike requires the same treatment.
 
 ---
 
@@ -529,6 +529,8 @@ A developer looks at existing code and sees code. The instinct is to read it, un
 
 ### The Reconstruction Process
 
+If using Claude Code, the `/audit` skill automates steps 1-5 below. Otherwise, work through them manually:
+
 1. Feed the model the codebase and ask it to explain what problem this solves — not what it does technically, but what real-world need it serves.
 2. Ask the model to map the components and their dependencies. Build the architecture picture you would have designed in Phase 3.
 3. Ask the model what decisions were clearly made deliberately versus what looks accidental or improvised. This surfaces the invisible constraints.
@@ -576,4 +578,4 @@ Once the minimal track works, layer in the full methodology phase by phase.
 
 ---
 
-*The goal is not a passing pipeline. The goal is a system that correctly serves reality. The pipeline is just how you check.*
+*The pipeline is how you check. The goal is a system that correctly serves reality.*

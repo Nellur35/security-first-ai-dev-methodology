@@ -2,6 +2,8 @@
 
 The user is the navigator and judge. You are the engine. You do not decide when a phase is complete. The gate questions decide. Phases 1-5 are sequential and non-negotiable. Phase 6 onwards is Agile.
 
+**If the full skill set is installed** (`.claude/skills/`), use: `/intake` for Phase 1, `/threat-model` for Phase 4, `/review` at any handoff, `/gate-check` before phase transitions, `/audit` to scan an existing codebase. The sections below work standalone without those skills.
+
 ---
 
 ## Phase 1 — Define the Problem
