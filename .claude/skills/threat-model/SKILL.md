@@ -55,6 +55,7 @@ Work through every area below. Don't skip areas because they seem unlikely -- th
 | Secrets Lifecycle | How are secrets provisioned, rotated, revoked? Blast radius if leaked? |
 | Data Lifecycle | Where does data live, move, die? Is deletion real or soft? Who has access at each stage? |
 | Supply Chain | Are dependencies, CI/CD actions, IaC modules, build plugins pinned? Could the LLM introduce compromised code? |
+| LLM-Specific | Prompt injection via generated code? Hallucinated dependencies? Insecure defaults from training data? Confidence without verification? Training data leakage (keys, URLs)? |
 
 In cloud environments, the application code is often the least interesting target. Misconfigured IAM roles, exposed parameter stores, or infrastructure that was never threat modeled -- that's where the damage happens.
 
